@@ -9,6 +9,7 @@ import { chainlinkFeedAbi } from '../public/abi/ChainlinkFeed.abi'
 
 import ChangeInTimeBar from './components/ChangeInTimeBar'
 import UnitsInTimeLine from './components/UnitsInTimeLine'
+import VaultBalanceItem from './components/VaultBalanceItem'
 
 export default async function Home() {
   const client = createPublicClient({
@@ -95,7 +96,7 @@ export default async function Home() {
         </div>
 
         {/* Total Unit Tokens Section */}
-        <div className="w-full mb-8">
+        <div className="w-full mb-12">
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-8 shadow-lg">
             <div className="text-white/80 text-sm font-medium mb-2">Total Unit Tokens</div>
             <div className="text-white text-5xl font-bold mb-4">
@@ -119,116 +120,36 @@ export default async function Home() {
         <div className="w-full mb-12">
           <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-100">Vault Balances</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* USDC Vault */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: colors.usdc + '20' }}>
-                  <span className="text-2xl font-bold" style={{ color: colors.usdc }}>$</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">USDC</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">USD Coin</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Balance</span>
-                  <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                    {usdcTotalAssets.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Price</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    ${usdcPrice.toFixed(4)}
-                  </span>
-                </div>
-                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Value</span>
-                    <span className="text-xl font-bold" style={{ color: colors.usdc }}>
-                      ${(usdcTotalAssets * usdcPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* USDT Vault */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: colors.usdt + '20' }}>
-                  <span className="text-2xl font-bold" style={{ color: colors.usdt }}>₮</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">USDT</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Tether</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Balance</span>
-                  <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                    {usdtTotalAssets.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Price</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    ${usdtPrice.toFixed(4)}
-                  </span>
-                </div>
-                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Value</span>
-                    <span className="text-xl font-bold" style={{ color: colors.usdt }}>
-                      ${(usdtTotalAssets * usdtPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* USDS Vault */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: colors.usds + '20' }}>
-                  <span className="text-2xl font-bold" style={{ color: colors.usds }}>◎</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">USDS</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Sky Dollar</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Balance</span>
-                  <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                    {usdsTotalAssets.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Price</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    ${usdsPrice.toFixed(4)}
-                  </span>
-                </div>
-                <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Value</span>
-                    <span className="text-xl font-bold" style={{ color: colors.usds }}>
-                      ${(usdsTotalAssets * usdsPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <VaultBalanceItem
+              symbol="USDC"
+              name="USD Coin"
+              color={colors.usdc}
+              icon="$"
+              totalAssets={usdcTotalAssets}
+              price={usdcPrice}
+            />
+            <VaultBalanceItem
+              symbol="USDT"
+              name="Tether"
+              color={colors.usdt}
+              icon="₮"
+              totalAssets={usdtTotalAssets}
+              price={usdtPrice}
+            />
+            <VaultBalanceItem
+              symbol="USDS"
+              name="Sky Dollar"
+              color={colors.usds}
+              icon="◎"
+              totalAssets={usdsTotalAssets}
+              price={usdsPrice}
+            />
           </div>
         </div>
 
         {/* Units In Time Chart Section */}
         <div className="w-full mb-12">
-          <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-100">Unit Tokens Over Time</h2>
+          <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-100">Unit Tokens</h2>
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
             <div style={{ height: '400px', width: '100%' }}>
               <UnitsInTimeLine data={unitsInTimeData} />
@@ -238,7 +159,7 @@ export default async function Home() {
 
         {/* Historical Chart Section */}
         <div className="w-full">
-          <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-100">Deposits Over Time</h2>
+          <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-100">Daily deposits</h2>
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
             <div style={{ height: '400px', width: '100%' }}>
               <ChangeInTimeBar

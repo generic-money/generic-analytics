@@ -1,4 +1,3 @@
-
 export const componentsTheme = (isDark: boolean) => ({
     background: 'transparent',
     text: {
