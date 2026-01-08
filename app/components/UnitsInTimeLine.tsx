@@ -2,6 +2,7 @@
 
 import { ResponsiveLine } from '@nivo/line'
 import { useEffect, useState } from 'react'
+import { componentsTheme } from './ComponentsTheme'
 
 interface UnitsInTimeLineProps {
     data: any[];
@@ -20,66 +21,15 @@ export default function UnitsInTimeLine({ data }: UnitsInTimeLineProps) {
         return () => darkModeMediaQuery.removeEventListener('change', handler);
     }, []);
 
-    const theme = {
-        background: 'transparent',
-        text: {
-            fontSize: 11,
-            fill: isDark ? '#a1a1aa' : '#52525b',
-            outlineWidth: 0,
-            outlineColor: 'transparent'
-        },
-        axis: {
-            domain: {
-                line: {
-                    stroke: isDark ? '#27272a' : '#e4e4e7',
-                    strokeWidth: 1
-                }
-            },
-            legend: {
-                text: {
-                    fontSize: 12,
-                    fill: isDark ? '#a1a1aa' : '#52525b',
-                    fontWeight: 600
-                }
-            },
-            ticks: {
-                line: {
-                    stroke: isDark ? '#27272a' : '#e4e4e7',
-                    strokeWidth: 1
-                },
-                text: {
-                    fontSize: 11,
-                    fill: isDark ? '#a1a1aa' : '#71717a'
-                }
-            }
-        },
-        grid: {
-            line: {
-                stroke: isDark ? '#27272a' : '#f4f4f5',
-                strokeWidth: 1
-            }
-        },
-        tooltip: {
-            container: {
-                background: isDark ? '#18181b' : '#ffffff',
-                color: isDark ? '#fafafa' : '#09090b',
-                fontSize: 12,
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                border: `1px solid ${isDark ? '#27272a' : '#e4e4e7'}`
-            }
-        }
-    };
-
     return (
         <ResponsiveLine
             data={data}
-            theme={theme}
+            theme={componentsTheme(isDark)}
             margin={{ top: 20, right: 20, bottom: 80, left: 70 }}
             xScale={{ type: 'point' }}
             yScale={{
                 type: 'linear',
-                min: 'auto',
+                min: 0,
                 max: 'auto',
                 stacked: false,
                 reverse: false
@@ -92,7 +42,7 @@ export default function UnitsInTimeLine({ data }: UnitsInTimeLineProps) {
                 tickPadding: 5,
                 tickRotation: -45,
                 legend: 'Date',
-                legendOffset: 60,
+                legendOffset: 70,
                 legendPosition: 'middle'
             }}
             axisLeft={{
