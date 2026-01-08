@@ -13,48 +13,59 @@ import VaultBalanceItem from './components/VaultBalanceItem'
 
 export default async function Home() {
   const client = createPublicClient({
+    batch: {
+      multicall: true,
+    },
     chain: mainnet,
     transport: http(),
   })
-  const unitTotalSupply = await client.readContract({
-    address: '0x8c307baDbd78bEa5A1cCF9677caa58e7A2172502',
-    abi: genericUnitAbi,
-    functionName: 'totalSupply',
-  }).then(res => Number(res) / 1e18) // Unit has 18 decimals
 
-  const usdcTotalAssets = await client.readContract({
-    address: '0x4825eFF24F9B7b76EEAFA2ecc6A1D5dFCb3c1c3f',
-    abi: genericVaultAbi,
-    functionName: 'totalAssets',
-  }).then(res => Number(res) / 1e6) // USDC has 6 decimals
-  const usdtTotalAssets = await client.readContract({
-    address: '0xB8280955aE7b5207AF4CDbdCd775135Bd38157fE',
-    abi: genericVaultAbi,
-    functionName: 'totalAssets',
-  }).then(res => Number(res) / 1e6) // USDT has 6 decimals
-  const usdsTotalAssets = await client.readContract({
-    address: '0x6133dA4Cd25773Ebd38542a8aCEF8F94cA89892A',
-    abi: genericVaultAbi,
-    functionName: 'totalAssets',
-  }).then(res => Number(res) / 1e18) // USDS has 18 decimals
+  const [unitTotalSupply, usdcTotalAssets, usdtTotalAssets, usdsTotalAssets, usdcPrice, usdtPrice, usdsPrice] = await Promise.all([
+    client.readContract({
+      address: '0x8c307baDbd78bEa5A1cCF9677caa58e7A2172502',
+      abi: genericUnitAbi,
+      functionName: 'totalSupply',
+    }).then(res => Number(res) / 1e18), // Unit has 18 decimals
 
-  const usdcPrice = await client.readContract({
-    address: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
-    abi: chainlinkFeedAbi,
-    functionName: 'latestRoundData',
-  }).then(res => Number(res[1]) / 1e8) // Chainlink USDC/USD feed has 8 decimals
-  const usdtPrice = await client.readContract({
-    address: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
-    abi: chainlinkFeedAbi,
-    functionName: 'latestRoundData',
-  }).then(res => Number(res[1]) / 1e8) // Chainlink USDT/USD feed has 8 decimals
-  const usdsPrice = await client.readContract({
-    address: '0xfF30586cD0F29eD462364C7e81375FC0C71219b1',
-    abi: chainlinkFeedAbi,
-    functionName: 'latestRoundData',
-  }).then(res => Number(res[1]) / 1e8) // Chainlink USDS/USD feed has 8 decimals
+    client.readContract({
+      address: '0x4825eFF24F9B7b76EEAFA2ecc6A1D5dFCb3c1c3f',
+      abi: genericVaultAbi,
+      functionName: 'totalAssets',
+    }).then(res => Number(res) / 1e6), // USDC has 6 decimals
+
+    client.readContract({
+      address: '0xB8280955aE7b5207AF4CDbdCd775135Bd38157fE',
+      abi: genericVaultAbi,
+      functionName: 'totalAssets',
+    }).then(res => Number(res) / 1e6), // USDT has 6 decimals
+
+    client.readContract({
+      address: '0x6133dA4Cd25773Ebd38542a8aCEF8F94cA89892A',
+      abi: genericVaultAbi,
+      functionName: 'totalAssets',
+    }).then(res => Number(res) / 1e18), // USDS has 18 decimals
+
+    client.readContract({
+      address: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
+      abi: chainlinkFeedAbi,
+      functionName: 'latestRoundData',
+    }).then(res => Number(res[1]) / 1e8), // Chainlink USDC/USD feed has 8 decimals
+
+    client.readContract({
+      address: '0x3E7d1eAB13ad0104d2750B8863b489D65364e32D',
+      abi: chainlinkFeedAbi,
+      functionName: 'latestRoundData',
+    }).then(res => Number(res[1]) / 1e8), // Chainlink USDT/USD feed has 8 decimals
+
+    client.readContract({
+      address: '0xfF30586cD0F29eD462364C7e81375FC0C71219b1',
+      abi: chainlinkFeedAbi,
+      functionName: 'latestRoundData',
+    }).then(res => Number(res[1]) / 1e8), // Chainlink USDS/USD feed has 8 decimals
+  ]);
 
   const dune = new DuneClient(process.env.DUNE_API_PREVIEW_KEY!);
+
   const unitsInTime = await dune.getLatestResult({queryId: 6283930}).then(res =>
     res.result?.rows.map(row => ({
       x: new Date(String(row.time)).toLocaleDateString(),
@@ -79,14 +90,14 @@ export default async function Home() {
     }))
   ) || [];
 
+  const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice;
+  const overcollateralization = (totalVaultValue / unitTotalSupply * 100);
+
   const colors = {
     usdc: '#2775CA',  // USDC blue (Circle's brand color)
     usdt: '#26A17B',  // USDT green (Tether's brand color)
     usds: '#6E62E5',  // USDS purple (Sky/MakerDAO inspired)
   }
-
-  const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice;
-  const overcollateralization = (totalVaultValue / unitTotalSupply * 100);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-900">

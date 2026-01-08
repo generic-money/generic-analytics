@@ -27,7 +27,7 @@ export default function VaultBalanceItem({ symbol, name, color, icon, totalAsset
                 </span>
             </div>
             <div className="flex justify-between items-center">
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">Price</span>
+                <span className="text-sm text-zinc-600 dark:text-zinc-400">Oracle Price</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 ${price.toFixed(4)}
                 </span>
