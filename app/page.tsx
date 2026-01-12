@@ -60,29 +60,22 @@ export default async function Home() {
     fetchUSDCVaultAutoDepositThreshold(),
     fetchUSDTVaultAutoDepositThreshold(),
     fetchUSDSVaultAutoDepositThreshold()
-  ]);
+  ])
 
-  const { unitsInTime, unitsExecutionEndedAt } = await fetchUnitsInTime();
+  const { unitsInTime, unitsExecutionEndedAt } = await fetchUnitsInTime()
   const unitsInTimeData = [
     {
       id: 'Unit Tokens',
       color: '#8b5cf6', // Purple color for units
       data: unitsInTime
     }
-  ];
+  ]
 
-  const { depositsInTime, depositsExecutionEndedAt } = await fetchDepositsInTime();
+  const { depositsInTime, depositsExecutionEndedAt } = await fetchDepositsInTime()
 
-  const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice;
-  const overcollateralization = (totalVaultValue * 100 / unitTotalSupply);
+  const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
+  const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
 
-  const colors = {
-    usdc: '#2775CA',  // USDC blue (Circle's brand color)
-    usdt: '#26A17B',  // USDT green (Tether's brand color)
-    usds: '#6E62E5',  // USDS purple (Sky/MakerDAO inspired)
-  }
-
-  // Vault settings (manually configured)
   const vaultSettings = {
     usdc: {
       maxCapacity: usdcVaultSettings.maxCapacity,
@@ -102,6 +95,12 @@ export default async function Home() {
       minProportionality: usdsVaultSettings.minProportionality,
       automaticDepositThreshold: usdsVaultAutoDepositThreshold
     }
+  }
+
+  const colors = {
+    usdc: '#2775CA',  // USDC blue (Circle's brand color)
+    usdt: '#26A17B',  // USDT green (Tether's brand color)
+    usds: '#6E62E5',  // USDS purple (Sky/MakerDAO inspired)
   }
 
   return (
