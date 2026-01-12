@@ -5,6 +5,9 @@ import ChangeInTimeBar from './components/ChangeInTimeBar'
 import UnitsInTimeLine from './components/UnitsInTimeLine'
 import VaultBalancesSection from './components/VaultBalancesSection'
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function Home() {
   const [unitTotalSupply, usdcTotalAssets, usdtTotalAssets, usdsTotalAssets, usdcPrice, usdtPrice, usdsPrice] = await Promise.all([
     fetchUnitTotalSupply(),
