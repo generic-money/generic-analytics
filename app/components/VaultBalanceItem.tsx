@@ -1,3 +1,5 @@
+import Tooltip from './Tooltip';
+
 interface VaultBalanceItemProps {
     symbol: string;
     name: string;
@@ -32,6 +34,31 @@ export default function VaultBalanceItem({ symbol, name, color, icon, totalAsset
                 ${price.toFixed(4)}
                 </span>
             </div>
+
+            {/* Slippage Section */}
+            <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400">Deposit Slippage</span>
+                        <Tooltip text="User $ loss when minting GUSD" />
+                    </div>
+                    <span className={`text-xs font-medium text-zinc-500 dark:text-zinc-400`}>
+                    {(price <= 1 ? 0 : (price - 1) * 100).toFixed(4)}%
+                    </span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400">Redeem Slippage</span>
+                        <Tooltip text="User $ loss when redeeming GUSD." />
+                    </div>
+                    <span className={`text-xs font-medium text-zinc-500 dark:text-zinc-400`}>
+                    {(price >= 1 ? 0 : (1 - price) * 100).toFixed(4)}%
+                    </span>
+                </div>
+                </div>
+            </div>
+
             <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800">
                 <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Value</span>
