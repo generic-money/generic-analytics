@@ -1,21 +1,18 @@
 'use server'
 
 import { client } from './client'
-import { controllerAbi } from '../../../public/abi/Controller.abi'
+import { controllerAbi } from '@/public/abi/Controller.abi'
+import { CONTRACTS } from '@/config/constants'
+import { VaultContract } from '@/app/types/vaults'
 
-interface ControlledVaultSettings {
-  controller: `0x${string}`;
-  vault: `0x${string}`;
-}
-
-export async function fetchVaultSettings(settings: ControlledVaultSettings) {
+export async function fetchVaultSettings(vault: VaultContract) {
     return client.readContract({
-      address: settings.controller,
+      address: CONTRACTS.controller.address,
       abi: controllerAbi,
       functionName: 'vaultSettings',
-      args: [settings.vault],
+      args: [vault.address],
     }).then(res => ({
-      maxCapacity: Number(res[0]) / 10 ** 18,
+      maxCapacity: Number(res[0]) / 10 ** CONTRACTS.assets.unit.decimals,
       minProportionality: res[1] / 100,
       maxProportionality: res[2] / 100,
     }))

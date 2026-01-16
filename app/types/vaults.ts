@@ -1,8 +1,9 @@
-/**
- * Type definitions for vault data structures
- */
-
 export type VaultKey = 'usdc' | 'usdt' | 'usds';
+
+export interface VaultContract {
+  address: `0x${string}`;
+  decimals: number;
+}
 
 export interface VaultMetadata {
   symbol: string;

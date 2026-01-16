@@ -1,3 +1,7 @@
+import { VaultsMap, VaultContract } from '@/app/types/vaults';
+import { AssetsMap, AssetContract } from '@/app/types/assets';
+import { PriceFeedsMap, PriceFeedContract } from '@/app/types/priceFeeds';
+
 export const CONTRACTS = {
   controller: {
     address: '0x3a64D23313E1bEAABa25Ec13149bD8D514C973Ae' as const,
@@ -36,7 +40,7 @@ export const CONTRACTS = {
       color: '#6E62E5',
       strategyAddress: '0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD' as const
     }
-  },
+  } as VaultsMap<VaultContract>,
   assets: {
     unit: {
       address: '0x8c307baDbd78bEa5A1cCF9677caa58e7A2172502' as const,
@@ -58,7 +62,7 @@ export const CONTRACTS = {
       decimals: 18,
       name: 'USDS Stablecoin'
     }
-  },
+  } as AssetsMap<AssetContract>,
   priceFeeds: {
     usdc: {
       address: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6' as const,
@@ -75,7 +79,7 @@ export const CONTRACTS = {
       decimals: 8,
       name: 'USDS/USD Chainlink Feed'
     }
-  },
+  } as PriceFeedsMap<PriceFeedContract>,
   predeposits: {
     status: {
       name: 'Status',

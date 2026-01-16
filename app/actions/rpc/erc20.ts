@@ -1,14 +1,10 @@
 'use server'
 
 import { client } from './client'
-import { erc20Abi } from '../../../public/abi/ERC20.abi'
+import { erc20Abi } from '@/public/abi/ERC20.abi'
+import { AssetContract } from '@/app/types/assets'
 
-interface Asset {
-  address: `0x${string}`;
-  decimals: number;
-}
-
-export async function fetchTotalSupply(asset: Asset) {
+export async function fetchTotalSupply(asset: AssetContract) {
   return client.readContract({
     address: asset.address,
     abi: erc20Abi,
@@ -16,7 +12,7 @@ export async function fetchTotalSupply(asset: Asset) {
   }).then(res => Number(res) / 10 ** asset.decimals)
 }
 
-export async function fetchBalanceOf(asset: Asset, owner: `0x${string}`) {
+export async function fetchBalanceOf(asset: AssetContract, owner: `0x${string}`) {
   return client.readContract({
     address: asset.address,
     abi: erc20Abi,

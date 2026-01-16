@@ -1,14 +1,10 @@
 'use server'
 
 import { client } from './client'
-import { genericVaultAbi } from '../../../public/abi/GenericVault.abi'
+import { genericVaultAbi } from '@/public/abi/GenericVault.abi'
+import { VaultContract } from '@/app/types/vaults'
 
-interface Vault {
-  address: `0x${string}`;
-  decimals: number;
-}
-
-export async function fetchTotalAssets(vault: Vault) {
+export async function fetchTotalAssets(vault: VaultContract) {
   return client.readContract({
     address: vault.address,
     abi: genericVaultAbi,
@@ -16,7 +12,7 @@ export async function fetchTotalAssets(vault: Vault) {
   }).then(res => Number(res) / 10 ** vault.decimals)
 }
 
-export async function fetchAutoDepositThreshold(vault: Vault) {
+export async function fetchAutoDepositThreshold(vault: VaultContract) {
     return client.readContract({
       address: vault.address,
       abi: genericVaultAbi,

@@ -1,7 +1,7 @@
 'use server'
 
 import { fetchDune } from './client'
-import { DUNE_QUERIES, CONTRACTS } from '../../../config/constants'
+import { DUNE_QUERIES, CONTRACTS } from '@/config/constants'
 
 export async function fetchPredepositsInTime() {
   return fetchDune(DUNE_QUERIES.predepositsInTime, row => ({
