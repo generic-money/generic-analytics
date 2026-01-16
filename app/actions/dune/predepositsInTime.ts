@@ -7,7 +7,7 @@ export async function fetchPredepositsInTime() {
   return fetchDune(DUNE_QUERIES.predepositsInTime, row => ({
     time: new Date(String(row.time)).toLocaleDateString(),
     chainNickname: row.chainNickname,
-    amount: (Number(row.amount) / 10 ** CONTRACTS.assets.unit.decimals).toFixed(2),
-    total: (Number(row.total) / 10 ** CONTRACTS.assets.unit.decimals).toFixed(2),
+    amount: Number(row.amount) / 10 ** CONTRACTS.assets.unit.decimals,
+    total: Number(row.total) / 10 ** CONTRACTS.assets.unit.decimals,
   }))
 }

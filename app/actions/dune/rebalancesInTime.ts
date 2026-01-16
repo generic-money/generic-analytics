@@ -8,8 +8,8 @@ export async function fetchRebalancesInTime() {
     time: new Date(String(row.time)).toLocaleDateString(),
     fromVault: row.fromVault,
     toVault: row.toVault,
-    fromAmount: (Number(row.fromAmount) / 10 ** getVaultDecimals(row.fromVault)).toFixed(2),
-    toAmount: (Number(row.toAmount) / 10 ** getVaultDecimals(row.toVault)).toFixed(2),
+    fromAmount: Number(row.fromAmount) / 10 ** getVaultDecimals(row.fromVault),
+    toAmount: Number(row.toAmount) / 10 ** getVaultDecimals(row.toVault),
   }))
 }
 

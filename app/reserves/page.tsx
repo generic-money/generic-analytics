@@ -1,4 +1,5 @@
 import * as rpc from '@/app/actions/rpc'
+import * as dune from '@/app/actions/dune'
 
 import VaultBalancesSection from '../components/VaultBalancesSection'
 import { buildVaultConfigs } from '../utils/vaults'
@@ -43,6 +44,9 @@ export default async function ProofOfReserves() {
     rpc.fetchPrice(CONTRACTS.priceFeeds.usds),
   ])
 
+  const yieldInTime = await dune.fetchYieldInTime()
+  const totalYield = yieldInTime.data[yieldInTime.data.length - 1]?.total as number || 0;
+
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
 
@@ -76,7 +80,7 @@ export default async function ProofOfReserves() {
         </div>
 
         {/* Total Units, Collateral Value, and Collateralization Section */}
-        <div className="w-full mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="w-full mb-12 grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Total Unit Tokens */}
           <div className="bg-gradient-to-br from-[#3F79FF] to-[#3F79FF]/70 rounded-2xl p-6 shadow-lg">
             <div className="text-white/80 text-sm font-medium mb-2">Total Unit Tokens</div>
@@ -98,6 +102,14 @@ export default async function ProofOfReserves() {
             <div className="text-white/80 text-sm font-medium mb-2">Collateralization</div>
             <div className="text-white text-3xl font-bold">
               {overcollateralization.toFixed(4)}%
+            </div>
+          </div>
+
+          {/* Total Yield */}
+          <div className="bg-gradient-to-br from-[#3F79FF] to-[#3F79FF]/70 rounded-2xl p-6 shadow-lg">
+            <div className="text-white/80 text-sm font-medium mb-2">Total Yield</div>
+            <div className="text-white text-3xl font-bold">
+              ${totalYield.toFixed(4)}
             </div>
           </div>
         </div>

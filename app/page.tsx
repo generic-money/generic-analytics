@@ -62,6 +62,8 @@ export default async function Home() {
 
   const unitsInTime = await dune.fetchUnitsInTime()
   const depositsInTime = await dune.fetchDepositsInTime()
+  const yieldInTime = await dune.fetchYieldInTime()
+  const totalYield = yieldInTime.data[yieldInTime.data.length - 1]?.total as number || 0;
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
@@ -136,6 +138,11 @@ export default async function Home() {
                 <span className="text-sm">Collateralization: </span>
                 <span className="text-xl font-semibold">{overcollateralization.toFixed(4)}%</span>
               </div>
+              <div className="h-6 w-px bg-white/30"></div>
+              <div>
+                <span className="text-sm">Total Yield: </span>
+                <span className="text-xl font-semibold">${Number(totalYield).toFixed(4)}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -161,7 +168,7 @@ export default async function Home() {
                     color: '#3F79FF',
                     data: unitsInTime.data.map(entry => ({
                       x: entry.time,
-                      y: entry.units
+                      y: entry.units.toFixed(2)
                     }))
                   }
                 ]}
@@ -183,7 +190,12 @@ export default async function Home() {
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
             <div style={{ height: '400px', width: '100%' }}>
               <ChangeInTimeBar
-                data={depositsInTime.data}
+                data={depositsInTime.data.map(entry => ({
+                  time: entry.time,
+                  usdc: Number(entry.usdc).toFixed(0),
+                  usdt: Number(entry.usdt).toFixed(0),
+                  usds: Number(entry.usds).toFixed(0),
+                }))}
                 indexBy={'time'}
                 keys={['usdc', 'usdt', 'usds']}
                 colors={[
