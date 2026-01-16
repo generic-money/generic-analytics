@@ -1,78 +1,61 @@
-import { fetchUnitsInTime, fetchDepositsInTime } from './actions/dune'
-import {
-  fetchUnitTotalSupply,
-  fetchUSDCVaultTotalAssets,
-  fetchUSDTVaultTotalAssets,
-  fetchUSDSVaultTotalAssets,
-  fetchUSDCVaultBalance,
-  fetchUSDTVaultBalance,
-  fetchUSDSVaultBalance,
-  fetchUSDCPrice,
-  fetchUSDTPrice,
-  fetchUSDSPrice,
-  fetchUSDCVaultSettings,
-  fetchUSDTVaultSettings,
-  fetchUSDSVaultSettings,
-  fetchUSDCVaultAutoDepositThreshold,
-  fetchUSDTVaultAutoDepositThreshold,
-  fetchUSDSVaultAutoDepositThreshold
-} from './actions/chain'
+import * as dune from './actions/dune'
+import * as rpc from './actions/rpc'
 
 import ChangeInTimeBar from './components/ChangeInTimeBar'
 import UnitsInTimeLine from './components/UnitsInTimeLine'
 import VaultBalancesSection from './components/VaultBalancesSection'
 import { buildVaultConfigs, getVaultColors } from './utils/vaults'
+import { CONTRACTS } from '../config/constants'
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function Home() {
   const [
+    // assets
     unitTotalSupply,
-    usdcTotalAssets,
-    usdtTotalAssets,
-    usdsTotalAssets,
     usdcVaultBalance,
     usdtVaultBalance,
     usdsVaultBalance,
-    usdcPrice,
-    usdtPrice,
-    usdsPrice,
+    // vaults
+    usdcTotalAssets,
+    usdtTotalAssets,
+    usdsTotalAssets,
+    usdcVaultAutoDepositThreshold,
+    usdtVaultAutoDepositThreshold,
+    usdsVaultAutoDepositThreshold,
+    // controller
     usdcVaultSettings,
     usdtVaultSettings,
     usdsVaultSettings,
-    usdcVaultAutoDepositThreshold,
-    usdtVaultAutoDepositThreshold,
-    usdsVaultAutoDepositThreshold
+    // prices
+    usdcPrice,
+    usdtPrice,
+    usdsPrice,
 ] = await Promise.all([
-    fetchUnitTotalSupply(),
-    fetchUSDCVaultTotalAssets(),
-    fetchUSDTVaultTotalAssets(),
-    fetchUSDSVaultTotalAssets(),
-    fetchUSDCVaultBalance(),
-    fetchUSDTVaultBalance(),
-    fetchUSDSVaultBalance(),
-    fetchUSDCPrice(),
-    fetchUSDTPrice(),
-    fetchUSDSPrice(),
-    fetchUSDCVaultSettings(),
-    fetchUSDTVaultSettings(),
-    fetchUSDSVaultSettings(),
-    fetchUSDCVaultAutoDepositThreshold(),
-    fetchUSDTVaultAutoDepositThreshold(),
-    fetchUSDSVaultAutoDepositThreshold()
+    rpc.fetchTotalSupply(CONTRACTS.assets.unit),
+    rpc.fetchBalanceOf(CONTRACTS.assets.usdc, CONTRACTS.vaults.usdc.address),
+    rpc.fetchBalanceOf(CONTRACTS.assets.usdt, CONTRACTS.vaults.usdt.address),
+    rpc.fetchBalanceOf(CONTRACTS.assets.usds, CONTRACTS.vaults.usds.address),
+
+    rpc.fetchTotalAssets(CONTRACTS.vaults.usdc),
+    rpc.fetchTotalAssets(CONTRACTS.vaults.usdt),
+    rpc.fetchTotalAssets(CONTRACTS.vaults.usds),
+    rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usdc),
+    rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usdt),
+    rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usds),
+
+    rpc.fetchVaultSettings(CONTRACTS.vaults.usdc),
+    rpc.fetchVaultSettings(CONTRACTS.vaults.usdt),
+    rpc.fetchVaultSettings(CONTRACTS.vaults.usds),
+
+    rpc.fetchPrice(CONTRACTS.priceFeeds.usdc),
+    rpc.fetchPrice(CONTRACTS.priceFeeds.usdt),
+    rpc.fetchPrice(CONTRACTS.priceFeeds.usds),
   ])
 
-  const { unitsInTime, unitsExecutionEndedAt } = await fetchUnitsInTime()
-  const unitsInTimeData = [
-    {
-      id: 'Unit Tokens',
-      color: '#3F79FF',
-      data: unitsInTime
-    }
-  ]
-
-  const { depositsInTime, depositsExecutionEndedAt } = await fetchDepositsInTime()
+  const unitsInTime = await dune.fetchUnitsInTime()
+  const depositsInTime = await dune.fetchDepositsInTime()
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
@@ -155,15 +138,25 @@ export default async function Home() {
         <div className="w-full mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Unit Tokens</h2>
-            {unitsExecutionEndedAt && (
+            {unitsInTime.executionEndedAt && (
               <div className="text-sm text-zinc-600 dark:text-zinc-400">
-                Last Dune query updated: {new Date(unitsExecutionEndedAt).toLocaleString()}
+                Last Dune query updated: {new Date(unitsInTime.executionEndedAt).toLocaleString()}
               </div>
             )}
           </div>
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
             <div style={{ height: '400px', width: '100%' }}>
-              <UnitsInTimeLine data={unitsInTimeData} />
+              <UnitsInTimeLine data={[
+                  {
+                    id: 'Unit Tokens',
+                    color: '#3F79FF',
+                    data: unitsInTime.data.map(entry => ({
+                      x: entry.time,
+                      y: entry.units
+                    }))
+                  }
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -172,16 +165,16 @@ export default async function Home() {
         <div className="w-full">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Daily deposits</h2>
-            {depositsExecutionEndedAt && (
+            {depositsInTime.executionEndedAt && (
               <div className="text-sm text-zinc-600 dark:text-zinc-400">
-                Last Dune query updated: {new Date(depositsExecutionEndedAt).toLocaleString()}
+                Last Dune query updated: {new Date(depositsInTime.executionEndedAt).toLocaleString()}
               </div>
             )}
           </div>
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
             <div style={{ height: '400px', width: '100%' }}>
               <ChangeInTimeBar
-                data={depositsInTime}
+                data={depositsInTime.data}
                 indexBy={'time'}
                 keys={['usdc', 'usdt', 'usds']}
                 colors={[

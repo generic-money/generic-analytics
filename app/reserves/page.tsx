@@ -1,46 +1,41 @@
-import {
-  fetchUnitTotalSupply,
-  fetchUSDCVaultTotalAssets,
-  fetchUSDTVaultTotalAssets,
-  fetchUSDSVaultTotalAssets,
-  fetchUSDCVaultBalance,
-  fetchUSDTVaultBalance,
-  fetchUSDSVaultBalance,
-  fetchUSDCPrice,
-  fetchUSDTPrice,
-  fetchUSDSPrice,
-} from '../actions/chain'
+import * as rpc from '@/app/actions/rpc'
 
 import VaultBalancesSection from '../components/VaultBalancesSection'
 import { buildVaultConfigs } from '../utils/vaults'
+import { CONTRACTS } from '@/config/constants'
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function ProofOfReserves() {
   const [
-    unitTotalSupply,
-    usdcTotalAssets,
-    usdtTotalAssets,
-    usdsTotalAssets,
-    usdcVaultBalance,
-    usdtVaultBalance,
-    usdsVaultBalance,
-    usdcPrice,
-    usdtPrice,
-    usdsPrice,
+      // assets
+      unitTotalSupply,
+      usdcVaultBalance,
+      usdtVaultBalance,
+      usdsVaultBalance,
+      // vaults
+      usdcTotalAssets,
+      usdtTotalAssets,
+      usdsTotalAssets,
+      // prices
+      usdcPrice,
+      usdtPrice,
+      usdsPrice,
   ] = await Promise.all([
-    fetchUnitTotalSupply(),
-    fetchUSDCVaultTotalAssets(),
-    fetchUSDTVaultTotalAssets(),
-    fetchUSDSVaultTotalAssets(),
-    fetchUSDCVaultBalance(),
-    fetchUSDTVaultBalance(),
-    fetchUSDSVaultBalance(),
-    fetchUSDCPrice(),
-    fetchUSDTPrice(),
-    fetchUSDSPrice(),
-  ])
+      rpc.fetchTotalSupply(CONTRACTS.assets.unit),
+      rpc.fetchBalanceOf(CONTRACTS.assets.usdc, CONTRACTS.vaults.usdc.address),
+      rpc.fetchBalanceOf(CONTRACTS.assets.usdt, CONTRACTS.vaults.usdt.address),
+      rpc.fetchBalanceOf(CONTRACTS.assets.usds, CONTRACTS.vaults.usds.address),
+
+      rpc.fetchTotalAssets(CONTRACTS.vaults.usdc),
+      rpc.fetchTotalAssets(CONTRACTS.vaults.usdt),
+      rpc.fetchTotalAssets(CONTRACTS.vaults.usds),
+
+      rpc.fetchPrice(CONTRACTS.priceFeeds.usdc),
+      rpc.fetchPrice(CONTRACTS.priceFeeds.usdt),
+      rpc.fetchPrice(CONTRACTS.priceFeeds.usds),
+    ])
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)

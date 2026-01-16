@@ -5,6 +5,8 @@ export interface VaultContract {
   decimals: number;
 }
 
+export type VaultsMap<T> = Record<VaultKey, T>;
+
 export interface VaultMetadata {
   symbol: string;
   name: string;
@@ -32,8 +34,6 @@ export interface VaultConfig {
   strategyAddress: string;
   vaultAddress: string;
 }
-
-export type VaultsMap<T> = Record<VaultKey, T>;
 
 export interface VaultBalancesSectionData {
   vaults: VaultsMap<VaultConfig>;

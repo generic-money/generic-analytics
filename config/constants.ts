@@ -40,7 +40,7 @@ export const CONTRACTS = {
       color: '#6E62E5',
       strategyAddress: '0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD' as const
     }
-  } as VaultsMap<VaultContract>,
+  } as VaultsMap<VaultContract> | VaultsMap<any>,
   assets: {
     unit: {
       address: '0x8c307baDbd78bEa5A1cCF9677caa58e7A2172502' as const,
