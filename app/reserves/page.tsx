@@ -9,33 +9,39 @@ export const revalidate = 0;
 
 export default async function ProofOfReserves() {
   const [
-      // assets
-      unitTotalSupply,
-      usdcVaultBalance,
-      usdtVaultBalance,
-      usdsVaultBalance,
-      // vaults
-      usdcTotalAssets,
-      usdtTotalAssets,
-      usdsTotalAssets,
-      // prices
-      usdcPrice,
-      usdtPrice,
-      usdsPrice,
+    // assets
+    unitTotalSupply,
+    usdcVaultBalance,
+    usdtVaultBalance,
+    usdsVaultBalance,
+    // vaults
+    usdcTotalAssets,
+    usdtTotalAssets,
+    usdsTotalAssets,
+    usdcAdditionalAvailableAssets,
+    usdtAdditionalAvailableAssets,
+    usdsAdditionalAvailableAssets,
+    // prices
+    usdcPrice,
+    usdtPrice,
+    usdsPrice,
   ] = await Promise.all([
-      rpc.fetchTotalSupply(CONTRACTS.assets.unit),
-      rpc.fetchBalanceOf(CONTRACTS.assets.usdc, CONTRACTS.vaults.usdc.address),
-      rpc.fetchBalanceOf(CONTRACTS.assets.usdt, CONTRACTS.vaults.usdt.address),
-      rpc.fetchBalanceOf(CONTRACTS.assets.usds, CONTRACTS.vaults.usds.address),
+    rpc.fetchTotalSupply(CONTRACTS.assets.unit),
+    rpc.fetchBalanceOf(CONTRACTS.assets.usdc, CONTRACTS.vaults.usdc.address),
+    rpc.fetchBalanceOf(CONTRACTS.assets.usdt, CONTRACTS.vaults.usdt.address),
+    rpc.fetchBalanceOf(CONTRACTS.assets.usds, CONTRACTS.vaults.usds.address),
 
-      rpc.fetchTotalAssets(CONTRACTS.vaults.usdc),
-      rpc.fetchTotalAssets(CONTRACTS.vaults.usdt),
-      rpc.fetchTotalAssets(CONTRACTS.vaults.usds),
+    rpc.fetchTotalAssets(CONTRACTS.vaults.usdc),
+    rpc.fetchTotalAssets(CONTRACTS.vaults.usdt),
+    rpc.fetchTotalAssets(CONTRACTS.vaults.usds),
+    rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usdc, CONTRACTS.vaults.usdc.strategy),
+    rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usdt, CONTRACTS.vaults.usdt.strategy),
+    rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usds, CONTRACTS.vaults.usds.strategy),
 
-      rpc.fetchPrice(CONTRACTS.priceFeeds.usdc),
-      rpc.fetchPrice(CONTRACTS.priceFeeds.usdt),
-      rpc.fetchPrice(CONTRACTS.priceFeeds.usds),
-    ])
+    rpc.fetchPrice(CONTRACTS.priceFeeds.usdc),
+    rpc.fetchPrice(CONTRACTS.priceFeeds.usdt),
+    rpc.fetchPrice(CONTRACTS.priceFeeds.usds),
+  ])
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
@@ -45,17 +51,20 @@ export default async function ProofOfReserves() {
     usdc: {
       totalAssets: usdcTotalAssets,
       vaultBalance: usdcVaultBalance,
-      price: usdcPrice
+      price: usdcPrice,
+      availableLiquidity: usdcVaultBalance + usdcAdditionalAvailableAssets
     },
     usdt: {
       totalAssets: usdtTotalAssets,
       vaultBalance: usdtVaultBalance,
-      price: usdtPrice
+      price: usdtPrice,
+      availableLiquidity: usdtVaultBalance + usdtAdditionalAvailableAssets
     },
     usds: {
       totalAssets: usdsTotalAssets,
       vaultBalance: usdsVaultBalance,
-      price: usdsPrice
+      price: usdsPrice,
+      availableLiquidity: usdsVaultBalance + usdsAdditionalAvailableAssets
     }
   })
 

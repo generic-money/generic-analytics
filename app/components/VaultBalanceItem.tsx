@@ -9,6 +9,7 @@ interface VaultBalanceItemProps {
     totalAssets: number;
     vaultBalance: number;
     price: number;
+    availableLiquidity: number;
     vaultSettings?: {
         maxCapacity: number;
         maxProportionality: number;
@@ -74,7 +75,6 @@ export default function VaultBalanceItem({ symbol, name, color, icon, totalAsset
                     </div>
                     <span className={`text-sm font-medium text-zinc-700 dark:text-zinc-300`}>
                     {(availableLiquidity / totalAssets * 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}%
-                    ({availableLiquidity.toLocaleString('en-US', { maximumFractionDigits: 2 })})
                     </span>
                 </div>
                 <div className="flex justify-between items-center">
