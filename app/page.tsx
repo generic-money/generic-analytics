@@ -43,11 +43,7 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-900">
       <main className="flex min-h-screen w-full max-w-6xl flex-col items-center py-6 px-6 bg-white dark:bg-black sm:items-start">
-        <div className="w-full mb-12 flex items-center justify-center">
-          <div>
-            <h1 className="text-4xl font-bold my-4 text-zinc-900 dark:text-zinc-100">Proof of Reserves</h1>
-          </div>
-        </div>
+        <h1 className="w-full my-12 text-4xl font-bold text-zinc-900 dark:text-zinc-100">Proof of Reserves</h1>
 
         <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MainValueItem
@@ -74,25 +70,25 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <VaultItem
-              assetMetadata={CONTRACTS.assets.usdc.metadata}
+              assetMetadata={CONTRACTS.ethereum.assets.usdc.metadata}
               totalAssets={usdcTotalAssets}
               price={usdcPrice}
-              vaultAddress={CONTRACTS.vaults.usdc.address}
-              strategyAddress={CONTRACTS.vaults.usdc.strategy.address}
+              vaultAddress={CONTRACTS.ethereum.vaults.usdc.address}
+              strategyAddress={CONTRACTS.ethereum.vaults.usdc.strategy.address}
             />
             <VaultItem
-              assetMetadata={CONTRACTS.assets.usdt.metadata}
+              assetMetadata={CONTRACTS.ethereum.assets.usdt.metadata}
               totalAssets={usdtTotalAssets}
               price={usdtPrice}
-              vaultAddress={CONTRACTS.vaults.usdt.address}
-              strategyAddress={CONTRACTS.vaults.usdt.strategy.address}
+              vaultAddress={CONTRACTS.ethereum.vaults.usdt.address}
+              strategyAddress={CONTRACTS.ethereum.vaults.usdt.strategy.address}
             />
             <VaultItem
-              assetMetadata={CONTRACTS.assets.usds.metadata}
+              assetMetadata={CONTRACTS.ethereum.assets.usds.metadata}
               totalAssets={usdsTotalAssets}
               price={usdsPrice}
-              vaultAddress={CONTRACTS.vaults.usds.address}
-              strategyAddress={CONTRACTS.vaults.usds.strategy.address}
+              vaultAddress={CONTRACTS.ethereum.vaults.usds.address}
+              strategyAddress={CONTRACTS.ethereum.vaults.usds.strategy.address}
             />
           </div>
         </div>
