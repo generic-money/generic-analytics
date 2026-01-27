@@ -10,6 +10,8 @@ import VaultItem from '../components/VaultItem'
 import MainValueItem from '../components/MainValueItem'
 import ValueItem from '../components/ValueItem'
 import { CONTRACTS } from '../../config/constants'
+import type { VaultItemInternalProps } from '../components/VaultItem'
+import { AssetKey } from 'node:sea'
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -20,23 +22,23 @@ export default async function Internal() {
     unitTotalSupply,
     citreaTotalSupply,
     citreaStakedGusdSupply,
-    // usdcVaultBalance,
-    // usdtVaultBalance,
-    // usdsVaultBalance,
+    usdcVaultBalance,
+    usdtVaultBalance,
+    usdsVaultBalance,
     // vaults
     usdcTotalAssets,
     usdtTotalAssets,
     usdsTotalAssets,
-    // usdcVaultAutoDepositThreshold,
-    // usdtVaultAutoDepositThreshold,
-    // usdsVaultAutoDepositThreshold,
+    usdcVaultAutoDepositThreshold,
+    usdtVaultAutoDepositThreshold,
+    usdsVaultAutoDepositThreshold,
     // usdcAdditionalAvailableAssets,
     // usdtAdditionalAvailableAssets,
     // usdsAdditionalAvailableAssets,
     // controller
-    // usdcVaultSettings,
-    // usdtVaultSettings,
-    // usdsVaultSettings,
+    usdcVaultSettings,
+    usdtVaultSettings,
+    usdsVaultSettings,
     // prices
     usdcPrice,
     usdtPrice,
@@ -49,23 +51,23 @@ export default async function Internal() {
     rpc.fetchTotalSupply(CONTRACTS.ethereum.assets.unit, mainnet),
     rpc.fetchTotalSupply(CONTRACTS.citrea.assets.unit, citrea),
     rpc.fetchTotalSupply(CONTRACTS.citrea.assets.sgusd, citrea),
-    // rpc.fetchBalanceOf(CONTRACTS.assets.usdc, CONTRACTS.vaults.usdc.address),
-    // rpc.fetchBalanceOf(CONTRACTS.assets.usdt, CONTRACTS.vaults.usdt.address),
-    // rpc.fetchBalanceOf(CONTRACTS.assets.usds, CONTRACTS.vaults.usds.address),
+    rpc.fetchBalanceOf(CONTRACTS.ethereum.assets.usdc, CONTRACTS.ethereum.vaults.usdc.address),
+    rpc.fetchBalanceOf(CONTRACTS.ethereum.assets.usdt, CONTRACTS.ethereum.vaults.usdt.address),
+    rpc.fetchBalanceOf(CONTRACTS.ethereum.assets.usds, CONTRACTS.ethereum.vaults.usds.address),
 
     rpc.fetchTotalAssets(CONTRACTS.ethereum.vaults.usdc),
     rpc.fetchTotalAssets(CONTRACTS.ethereum.vaults.usdt),
     rpc.fetchTotalAssets(CONTRACTS.ethereum.vaults.usds),
-    // rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usdc),
-    // rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usdt),
-    // rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usds),
-    // rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usdc),
+    rpc.fetchAutoDepositThreshold(CONTRACTS.ethereum.vaults.usdc),
+    rpc.fetchAutoDepositThreshold(CONTRACTS.ethereum.vaults.usdt),
+    rpc.fetchAutoDepositThreshold(CONTRACTS.ethereum.vaults.usds),
+    // rpc.fetchAdditionalAvailableAssets(CONTRACTS.ethereum.vaults.usdc),
     // rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usdt),
     // rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usds),
 
-    // rpc.fetchVaultSettings(CONTRACTS.vaults.usdc),
-    // rpc.fetchVaultSettings(CONTRACTS.vaults.usdt),
-    // rpc.fetchVaultSettings(CONTRACTS.vaults.usds),
+    rpc.fetchVaultSettings(CONTRACTS.ethereum.vaults.usdc),
+    rpc.fetchVaultSettings(CONTRACTS.ethereum.vaults.usdt),
+    rpc.fetchVaultSettings(CONTRACTS.ethereum.vaults.usds),
 
     rpc.fetchPrice(CONTRACTS.ethereum.priceFeeds.usdc),
     rpc.fetchPrice(CONTRACTS.ethereum.priceFeeds.usdt),
@@ -81,6 +83,36 @@ export default async function Internal() {
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
+
+  const internalVaultsData = {
+    usdc: {
+      allocated: (usdcTotalAssets - usdcVaultBalance) / usdcTotalAssets * 100,
+      mintSlippage: usdcPrice <= 1 ? 0 : (usdcPrice - 1) * 100,
+      redeemSlippage: usdcPrice >= 1 ? 0 : (1 - usdcPrice) * 100,
+      maxCapacity: usdcVaultSettings.maxCapacity,
+      minProportionality: usdcVaultSettings.minProportionality,
+      maxProportionality: usdcVaultSettings.maxProportionality,
+      autodepositThreshold: usdcVaultAutoDepositThreshold,
+    },
+    usdt: {
+      allocated: (usdtTotalAssets - usdtVaultBalance) / usdtTotalAssets * 100,
+      mintSlippage: usdtPrice <= 1 ? 0 : (usdtPrice - 1) * 100,
+      redeemSlippage: usdtPrice >= 1 ? 0 : (1 - usdtPrice) * 100,
+      maxCapacity: usdtVaultSettings.maxCapacity,
+      minProportionality: usdtVaultSettings.minProportionality,
+      maxProportionality: usdtVaultSettings.maxProportionality,
+      autodepositThreshold: usdtVaultAutoDepositThreshold,
+    },
+    usds: {
+      allocated: (usdsTotalAssets - usdsVaultBalance) / usdsTotalAssets * 100,
+      mintSlippage: usdsPrice <= 1 ? 0 : (usdsPrice - 1) * 100,
+      redeemSlippage: usdsPrice >= 1 ? 0 : (1 - usdsPrice) * 100,
+      maxCapacity: usdsVaultSettings.maxCapacity,
+      minProportionality: usdsVaultSettings.minProportionality,
+      maxProportionality: usdtVaultSettings.maxProportionality,
+      autodepositThreshold: usdtVaultAutoDepositThreshold,
+    },
+  } as Record<AssetKey, VaultItemInternalProps>
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-900">
@@ -132,6 +164,7 @@ export default async function Internal() {
               price={usdcPrice}
               vaultAddress={CONTRACTS.ethereum.vaults.usdc.address}
               strategyAddress={CONTRACTS.ethereum.vaults.usdc.strategy.address}
+              internal={internalVaultsData.usdc}
             />
             <VaultItem
               assetMetadata={CONTRACTS.ethereum.assets.usdt.metadata}
@@ -139,6 +172,7 @@ export default async function Internal() {
               price={usdtPrice}
               vaultAddress={CONTRACTS.ethereum.vaults.usdt.address}
               strategyAddress={CONTRACTS.ethereum.vaults.usdt.strategy.address}
+              internal={internalVaultsData.usdt}
             />
             <VaultItem
               assetMetadata={CONTRACTS.ethereum.assets.usds.metadata}
@@ -146,6 +180,7 @@ export default async function Internal() {
               price={usdsPrice}
               vaultAddress={CONTRACTS.ethereum.vaults.usds.address}
               strategyAddress={CONTRACTS.ethereum.vaults.usds.strategy.address}
+              internal={internalVaultsData.usds}
             />
           </div>
         </div>
