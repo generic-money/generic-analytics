@@ -52,7 +52,7 @@ export default function UnitsInTimeLine({ data }: UnitsInTimeLineProps) {
                 legend: 'Unit Tokens',
                 legendOffset: -60,
                 legendPosition: 'middle',
-                // format: (value: number) => `${(value / 1000).toFixed(0)}K`
+                format: (value: number) => `${(value / 1000).toFixed(0)}K`
             }}
             enableGridX={true}
             enableGridY={false}

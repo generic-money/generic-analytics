@@ -64,7 +64,7 @@ export default function ChangeInTimeBar({ data, indexBy, keys, colors }: ChangeI
                 legend: 'Deposits',
                 legendOffset: -60,
                 legendPosition: 'middle',
-                // format: (value) => `${(value / 1000).toFixed(0)}K`
+                format: (value) => `${(value / 1000).toFixed(0)}K`
             }}
             margin={{ top: 20, right: 70, bottom: 80, left: 70 }}
             borderRadius={4}
