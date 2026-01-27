@@ -1,19 +1,24 @@
+import Image from 'next/image'
+import { mainnet } from 'viem/chains'
+
+import { citrea } from '../../config/chains/citrea'
 import * as dune from '../actions/dune'
 import * as rpc from '../actions/rpc'
-
 import ChangeInTimeBar from '../components/ChangeInTimeBar'
 import UnitsInTimeLine from '../components/UnitsInTimeLine'
 import VaultItem from '../components/VaultItem'
 import MainValueItem from '../components/MainValueItem'
+import ValueItem from '../components/ValueItem'
 import { CONTRACTS } from '../../config/constants'
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function Home() {
+export default async function Internal() {
   const [
     // assets
     unitTotalSupply,
+    citreaTotalSupply,
     // usdcVaultBalance,
     // usdtVaultBalance,
     // usdsVaultBalance,
@@ -35,17 +40,20 @@ export default async function Home() {
     usdcPrice,
     usdtPrice,
     usdsPrice,
+    // redemptionPrice
+    redemptionPrice,
     // bridgeCoordinator
-    totalPredeposits,
-] = await Promise.all([
-    rpc.fetchTotalSupply(CONTRACTS.assets.unit),
+    statusPredeposits,
+  ] = await Promise.all([
+    rpc.fetchTotalSupply(CONTRACTS.ethereum.assets.unit, mainnet),
+    rpc.fetchTotalSupply(CONTRACTS.citrea.assets.unit, citrea),
     // rpc.fetchBalanceOf(CONTRACTS.assets.usdc, CONTRACTS.vaults.usdc.address),
     // rpc.fetchBalanceOf(CONTRACTS.assets.usdt, CONTRACTS.vaults.usdt.address),
     // rpc.fetchBalanceOf(CONTRACTS.assets.usds, CONTRACTS.vaults.usds.address),
 
-    rpc.fetchTotalAssets(CONTRACTS.vaults.usdc),
-    rpc.fetchTotalAssets(CONTRACTS.vaults.usdt),
-    rpc.fetchTotalAssets(CONTRACTS.vaults.usds),
+    rpc.fetchTotalAssets(CONTRACTS.ethereum.vaults.usdc),
+    rpc.fetchTotalAssets(CONTRACTS.ethereum.vaults.usdt),
+    rpc.fetchTotalAssets(CONTRACTS.ethereum.vaults.usds),
     // rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usdc),
     // rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usdt),
     // rpc.fetchAutoDepositThreshold(CONTRACTS.vaults.usds),
@@ -57,17 +65,17 @@ export default async function Home() {
     // rpc.fetchVaultSettings(CONTRACTS.vaults.usdt),
     // rpc.fetchVaultSettings(CONTRACTS.vaults.usds),
 
-    rpc.fetchPrice(CONTRACTS.priceFeeds.usdc),
-    rpc.fetchPrice(CONTRACTS.priceFeeds.usdt),
-    rpc.fetchPrice(CONTRACTS.priceFeeds.usds),
+    rpc.fetchPrice(CONTRACTS.ethereum.priceFeeds.usdc),
+    rpc.fetchPrice(CONTRACTS.ethereum.priceFeeds.usdt),
+    rpc.fetchPrice(CONTRACTS.ethereum.priceFeeds.usds),
 
-    rpc.fetchTotalPredeposits(CONTRACTS.predeposits.status.nickname),
+    rpc.fetchShareRedemptionPrice(),
+
+    rpc.fetchTotalPredeposits(CONTRACTS.ethereum.predeposits.status.nickname),
   ])
 
   const unitsInTime = await dune.fetchUnitsInTime()
   const depositsInTime = await dune.fetchDepositsInTime()
-  const yieldInTime = await dune.fetchYieldInTime()
-  const totalYield = yieldInTime.data[yieldInTime.data.length - 1]?.total as number || 0;
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
@@ -96,75 +104,46 @@ export default async function Home() {
           />
         </div>
 
-        {/* Total Unit Tokens Section */}
-        <div className="w-full mb-12">
-          <div className="bg-gradient-to-br from-[#3F79FF] to-[#3F79FF]/70 rounded-2xl p-8 shadow-lg">
-            <div className="text-white/80 text-sm font-medium mb-2">Total Unit Tokens</div>
-            <div className="text-white text-5xl font-bold mb-4">
-              {unitTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-            </div>
-            <div className="flex items-center gap-4 text-white/90">
-              <div>
-                <span className="text-sm">Total Collateral Value: </span>
-                <span className="text-xl font-semibold">${totalVaultValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="h-6 w-px bg-white/30"></div>
-              <div>
-                <span className="text-sm">Collateralization: </span>
-                <span className="text-xl font-semibold">{overcollateralization.toFixed(4)}%</span>
-              </div>
-              <div className="h-6 w-px bg-white/30"></div>
-              <div>
-                <span className="text-sm">Total Yield: </span>
-                <span className="text-xl font-semibold">${Number(totalYield).toFixed(4)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Status Predeposits Section */}
-        <div className="w-full mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Predeposits</h2>
-          </div>
-          <div className="max-w-xs bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div>
-                <div className="text-zinc-600 dark:text-zinc-400 text-sm font-medium mb-1">Status</div>
-                <div className="text-zinc-900 dark:text-zinc-100 text-3xl font-bold">
-                  {totalPredeposits.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                </div>
-              </div>
-            </div>
-          </div>
+        <h2 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">Chains</h2>
+        <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ValueItem
+            label='StatusL2 (Predeposit)'
+            value={statusPredeposits.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          />
+          <ValueItem
+            label='Citrea'
+            value={citreaTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          />
+          <ValueItem
+            label='Ethereum'
+            value={(unitTotalSupply - (statusPredeposits + citreaTotalSupply)).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          />
         </div>
 
         {/* Vault Balances Section */}
+        <h2 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">Collateral</h2>
         <div className="w-full mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Collateral</h2>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <VaultItem
-              assetMetadata={CONTRACTS.assets.usdc.metadata}
+              assetMetadata={CONTRACTS.ethereum.assets.usdc.metadata}
               totalAssets={usdcTotalAssets}
               price={usdcPrice}
-              vaultAddress={CONTRACTS.vaults.usdc.address}
-              strategyAddress={CONTRACTS.vaults.usdc.strategy.address}
+              vaultAddress={CONTRACTS.ethereum.vaults.usdc.address}
+              strategyAddress={CONTRACTS.ethereum.vaults.usdc.strategy.address}
             />
             <VaultItem
-              assetMetadata={CONTRACTS.assets.usdt.metadata}
+              assetMetadata={CONTRACTS.ethereum.assets.usdt.metadata}
               totalAssets={usdtTotalAssets}
               price={usdtPrice}
-              vaultAddress={CONTRACTS.vaults.usdt.address}
-              strategyAddress={CONTRACTS.vaults.usdt.strategy.address}
+              vaultAddress={CONTRACTS.ethereum.vaults.usdt.address}
+              strategyAddress={CONTRACTS.ethereum.vaults.usdt.strategy.address}
             />
             <VaultItem
-              assetMetadata={CONTRACTS.assets.usds.metadata}
+              assetMetadata={CONTRACTS.ethereum.assets.usds.metadata}
               totalAssets={usdsTotalAssets}
               price={usdsPrice}
-              vaultAddress={CONTRACTS.vaults.usds.address}
-              strategyAddress={CONTRACTS.vaults.usds.strategy.address}
+              vaultAddress={CONTRACTS.ethereum.vaults.usds.address}
+              strategyAddress={CONTRACTS.ethereum.vaults.usds.strategy.address}
             />
           </div>
         </div>
@@ -172,7 +151,7 @@ export default async function Home() {
         {/* Units In Time Chart Section */}
         <div className="w-full mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Unit Tokens</h2>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Unit Tokens (last 14 days)</h2>
             {unitsInTime.executionEndedAt && (
               <div className="text-sm text-zinc-600 dark:text-zinc-400">
                 Last Dune query updated: {new Date(unitsInTime.executionEndedAt).toLocaleString()}
@@ -182,15 +161,15 @@ export default async function Home() {
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
             <div style={{ height: '400px', width: '100%' }}>
               <UnitsInTimeLine data={[
-                  {
-                    id: 'Unit Tokens',
-                    color: '#3F79FF',
-                    data: unitsInTime.data.map(entry => ({
-                      x: entry.time,
-                      y: entry.units.toFixed(2)
-                    }))
-                  }
-                ]}
+                {
+                  id: 'Unit Tokens',
+                  color: '#3F79FF',
+                  data: unitsInTime.data.slice(-14).map(entry => ({
+                    x: entry.time,
+                    y: entry.units.toFixed(2)
+                  }))
+                }
+              ]}
               />
             </div>
           </div>
@@ -199,17 +178,17 @@ export default async function Home() {
         {/* Historical Chart Section */}
         <div className="w-full">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Daily deposits</h2>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Deposits (last 14 days)</h2>
             {depositsInTime.executionEndedAt && (
               <div className="text-sm text-zinc-600 dark:text-zinc-400">
                 Last Dune query updated: {new Date(depositsInTime.executionEndedAt).toLocaleString()}
               </div>
             )}
           </div>
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm mb-12">
             <div style={{ height: '400px', width: '100%' }}>
               <ChangeInTimeBar
-                data={depositsInTime.data.map(entry => ({
+                data={depositsInTime.data.slice(-14).map(entry => ({
                   time: entry.time,
                   usdc: Number(entry.usdc).toFixed(0),
                   usdt: Number(entry.usdt).toFixed(0),
@@ -218,14 +197,24 @@ export default async function Home() {
                 indexBy={'time'}
                 keys={['usdc', 'usdt', 'usds']}
                 colors={[
-                  CONTRACTS.assets.usdc.metadata.color,
-                  CONTRACTS.assets.usdt.metadata.color,
-                  CONTRACTS.assets.usds.metadata.color,
+                  CONTRACTS.ethereum.assets.usdc.metadata.color,
+                  CONTRACTS.ethereum.assets.usdt.metadata.color,
+                  CONTRACTS.ethereum.assets.usds.metadata.color,
                 ]}
               />
             </div>
           </div>
         </div>
+
+        <footer className="w-full mt-auto pt-8 pb-4 flex items-center justify-center border-t border-zinc-200 dark:border-zinc-800">
+          <Image
+            src="/img/generic-logo.png"
+            alt="Generic Protocol Logo"
+            width={160}
+            height={80}
+            priority
+          />
+        </footer>
       </main>
     </div>
   );
