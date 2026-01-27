@@ -82,8 +82,8 @@ export default async function Internal() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-900">
-      <main className="flex min-h-screen w-full max-w-6xl flex-col items-center py-12 px-6 bg-white dark:bg-black sm:items-start">
-        <h1 className="w-full mb-12 text-4xl font-bold text-zinc-900 dark:text-zinc-100">Generic Internal Analytics</h1>
+      <main className="flex min-h-screen w-full max-w-6xl flex-col items-center py-6 px-6 bg-white dark:bg-black sm:items-start">
+        <h1 className="w-full my-12 text-4xl font-bold text-zinc-900 dark:text-zinc-100">Generic Internal Analytics</h1>
 
         <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MainValueItem
