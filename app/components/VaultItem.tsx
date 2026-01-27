@@ -13,6 +13,7 @@ interface VaultItemProps {
 
 export interface VaultItemInternalProps {
   allocated: number;
+  available: number;
   mintSlippage: number;
   redeemSlippage: number;
   maxCapacity: number;
@@ -95,6 +96,12 @@ export default function VaultItem(props: VaultItemProps) {
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Allocated</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {props.internal.allocated.toFixed(0)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Available</span>
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  {props.internal.available.toFixed(0)}%
                 </span>
               </div>
             </div>

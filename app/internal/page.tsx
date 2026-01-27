@@ -32,9 +32,9 @@ export default async function Internal() {
     usdcVaultAutoDepositThreshold,
     usdtVaultAutoDepositThreshold,
     usdsVaultAutoDepositThreshold,
-    // usdcAdditionalAvailableAssets,
-    // usdtAdditionalAvailableAssets,
-    // usdsAdditionalAvailableAssets,
+    usdcAdditionalAvailableAssets,
+    usdtAdditionalAvailableAssets,
+    usdsAdditionalAvailableAssets,
     // controller
     usdcVaultSettings,
     usdtVaultSettings,
@@ -61,9 +61,9 @@ export default async function Internal() {
     rpc.fetchAutoDepositThreshold(CONTRACTS.ethereum.vaults.usdc),
     rpc.fetchAutoDepositThreshold(CONTRACTS.ethereum.vaults.usdt),
     rpc.fetchAutoDepositThreshold(CONTRACTS.ethereum.vaults.usds),
-    // rpc.fetchAdditionalAvailableAssets(CONTRACTS.ethereum.vaults.usdc),
-    // rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usdt),
-    // rpc.fetchAdditionalAvailableAssets(CONTRACTS.vaults.usds),
+    rpc.fetchAdditionalAvailableAssets(CONTRACTS.ethereum.vaults.usdc),
+    rpc.fetchAdditionalAvailableAssets(CONTRACTS.ethereum.vaults.usdt),
+    rpc.fetchAdditionalAvailableAssets(CONTRACTS.ethereum.vaults.usds),
 
     rpc.fetchVaultSettings(CONTRACTS.ethereum.vaults.usdc),
     rpc.fetchVaultSettings(CONTRACTS.ethereum.vaults.usdt),
@@ -87,6 +87,7 @@ export default async function Internal() {
   const internalVaultsData = {
     usdc: {
       allocated: (usdcTotalAssets - usdcVaultBalance) / usdcTotalAssets * 100,
+      available: (usdcAdditionalAvailableAssets + usdcVaultBalance) / usdcTotalAssets * 100,
       mintSlippage: usdcPrice <= 1 ? 0 : (usdcPrice - 1) * 100,
       redeemSlippage: usdcPrice >= 1 ? 0 : (1 - usdcPrice) * 100,
       maxCapacity: usdcVaultSettings.maxCapacity,
@@ -96,6 +97,7 @@ export default async function Internal() {
     },
     usdt: {
       allocated: (usdtTotalAssets - usdtVaultBalance) / usdtTotalAssets * 100,
+      available: (usdtAdditionalAvailableAssets + usdtVaultBalance) / usdtTotalAssets * 100,
       mintSlippage: usdtPrice <= 1 ? 0 : (usdtPrice - 1) * 100,
       redeemSlippage: usdtPrice >= 1 ? 0 : (1 - usdtPrice) * 100,
       maxCapacity: usdtVaultSettings.maxCapacity,
@@ -105,6 +107,7 @@ export default async function Internal() {
     },
     usds: {
       allocated: (usdsTotalAssets - usdsVaultBalance) / usdsTotalAssets * 100,
+      available: (usdsAdditionalAvailableAssets + usdsVaultBalance) / usdsTotalAssets * 100,
       mintSlippage: usdsPrice <= 1 ? 0 : (usdsPrice - 1) * 100,
       redeemSlippage: usdsPrice >= 1 ? 0 : (1 - usdsPrice) * 100,
       maxCapacity: usdsVaultSettings.maxCapacity,
