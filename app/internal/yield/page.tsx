@@ -11,6 +11,10 @@ interface ChainYield {
   name: string
   supply: number
   yieldAmount: number
+  breakdown?: {
+    staked?: number
+    unstaked?: number
+  }
 }
 
 export default function YieldDistributionCalculator() {
@@ -24,6 +28,8 @@ export default function YieldDistributionCalculator() {
   const [chainSupplies, setChainSupplies] = useState<{
     ethereum: number
     citrea: number
+    citreaStaked: number
+    citreaUnstaked: number
     status: number
     total: number
   } | null>(null)
@@ -47,6 +53,13 @@ export default function YieldDistributionCalculator() {
     const genericFee = getGenericFee(yieldAmount)
     const yieldAfterFee = getYieldAfterFee(yieldAmount)
 
+    // Calculate Citrea's total yield
+    const citreaYield = chainSupplies.total > 0 ? (chainSupplies.citrea / chainSupplies.total) * yieldAfterFee : 0
+
+    // Calculate proportional distribution within Citrea (staked vs unstaked)
+    const citreaStakedYield = chainSupplies.citrea > 0 ? (chainSupplies.citreaStaked / chainSupplies.citrea) * citreaYield : 0
+    const citreaUnstakedYield = chainSupplies.citrea > 0 ? (chainSupplies.citreaUnstaked / chainSupplies.citrea) * citreaYield : 0
+
     const chains: ChainYield[] = [
       {
         name: 'Generic Fee',
@@ -61,7 +74,11 @@ export default function YieldDistributionCalculator() {
       {
         name: 'Citrea',
         supply: chainSupplies.citrea,
-        yieldAmount: chainSupplies.total > 0 ? (chainSupplies.citrea / chainSupplies.total) * yieldAfterFee : 0,
+        yieldAmount: citreaYield,
+        breakdown: {
+          staked: citreaStakedYield,
+          unstaked: citreaUnstakedYield,
+        },
       },
       {
         name: 'Status L2 (Predeposit)',
@@ -169,6 +186,7 @@ export default function YieldDistributionCalculator() {
         // Unit supplies
         ethereumUnitSupply,
         citreaUnitSupply,
+        citreaStakedGusdSupply,
         // Predeposits
         statusPredeposits,
         // Safety buffer
@@ -184,6 +202,7 @@ export default function YieldDistributionCalculator() {
 
         rpc.fetchTotalSupply(CONTRACTS.ethereum.assets.unit, mainnet),
         rpc.fetchTotalSupply(CONTRACTS.citrea.assets.unit, citrea),
+        rpc.fetchTotalSupply(CONTRACTS.citrea.assets.sgusd, citrea),
 
         rpc.fetchTotalPredeposits(CONTRACTS.ethereum.predeposits.status.nickname),
 
@@ -208,6 +227,9 @@ export default function YieldDistributionCalculator() {
       // Calculate Ethereum supply (total - other chains)
       const ethereumSupply = ethereumUnitSupply - citreaUnitSupply - statusPredeposits
 
+      // Calculate Citrea breakdown (staked vs unstaked)
+      const citreaUnstakedGusdSupply = citreaUnitSupply - citreaStakedGusdSupply
+
       // Calculate total supply across all chains (should equal total unit supply)
       const totalChainSupply = ethereumSupply + citreaUnitSupply + statusPredeposits
 
@@ -215,6 +237,8 @@ export default function YieldDistributionCalculator() {
       setChainSupplies({
         ethereum: ethereumSupply,
         citrea: citreaUnitSupply,
+        citreaStaked: citreaStakedGusdSupply,
+        citreaUnstaked: citreaUnstakedGusdSupply,
         status: statusPredeposits,
         total: totalChainSupply,
       })
@@ -235,6 +259,10 @@ export default function YieldDistributionCalculator() {
           name: 'Citrea',
           supply: citreaUnitSupply,
           yieldAmount: 0,
+          breakdown: {
+            staked: 0,
+            unstaked: 0,
+          },
         },
         {
           name: 'Status L2 (Predeposit)',
@@ -407,6 +435,57 @@ export default function YieldDistributionCalculator() {
                         <span className="text-sm font-mono text-zinc-500 dark:text-zinc-500">
                           {((chain.supply / chainSupplies.total) * 100).toFixed(2)}%
                         </span>
+                      </div>
+                    )}
+
+                    {/* Citrea Breakdown: Staked vs Unstaked */}
+                    {chain.name === 'Citrea' && chain.breakdown && chainSupplies && (
+                      <div className="mt-4 pt-4 border-t border-zinc-300 dark:border-zinc-700 space-y-3">
+                        <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Distribution Breakdown</h4>
+
+                        <div className="pl-3 space-y-2">
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm text-zinc-600 dark:text-zinc-400">Staked (sGUSD):</span>
+                              <span className="text-sm font-mono font-semibold text-blue-600 dark:text-blue-400">
+                                ${chain.breakdown.staked?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-zinc-500 dark:text-zinc-500">Supply:</span>
+                              <span className="font-mono text-zinc-500 dark:text-zinc-500">
+                                {chainSupplies.citreaStaked.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GUSD
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-zinc-500 dark:text-zinc-500">Proportion:</span>
+                              <span className="font-mono text-zinc-500 dark:text-zinc-500">
+                                {((chainSupplies.citreaStaked / chainSupplies.citrea) * 100).toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm text-zinc-600 dark:text-zinc-400">Unstaked (GUSD):</span>
+                              <span className="text-sm font-mono font-semibold text-purple-600 dark:text-purple-400">
+                                ${chain.breakdown.unstaked?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-zinc-500 dark:text-zinc-500">Supply:</span>
+                              <span className="font-mono text-zinc-500 dark:text-zinc-500">
+                                {chainSupplies.citreaUnstaked.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GUSD
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-zinc-500 dark:text-zinc-500">Proportion:</span>
+                              <span className="font-mono text-zinc-500 dark:text-zinc-500">
+                                {((chainSupplies.citreaUnstaked / chainSupplies.citrea) * 100).toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
