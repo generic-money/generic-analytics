@@ -518,7 +518,7 @@ export default function YieldDistributionCalculator() {
                       <div className="flex justify-between">
                         <span className="text-zinc-600 dark:text-zinc-400">Chain Supply:</span>
                         <span className="font-mono text-zinc-900 dark:text-zinc-100">
-                          {chain.supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GUSD
+                          {chain.supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     )}
@@ -529,7 +529,7 @@ export default function YieldDistributionCalculator() {
                       </span>
                     </div>
                     {chainSupplies && chainSupplies.total > 0 && chain.key !== 'generic' && (
-                      <div className="flex justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                      <div className="flex justify-between pt-1 border-t border-zinc-200 dark:border-zinc-800">
                         <span className="text-sm text-zinc-500 dark:text-zinc-500">Proportion:</span>
                         <span className="text-sm font-mono text-zinc-500 dark:text-zinc-500">
                           {((chain.supply / chainSupplies.total) * 100).toFixed(2)}%
@@ -567,7 +567,7 @@ export default function YieldDistributionCalculator() {
                                     <div className="flex justify-between text-xs mb-0.5">
                                       <span className="text-zinc-500 dark:text-zinc-500">Supply:</span>
                                       <span className="font-mono text-zinc-500 dark:text-zinc-500">
-                                        {breakdown.supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} GUSD
+                                        {breakdown.supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </span>
                                     </div>
                                     <div className="flex justify-between text-xs mb-2">
