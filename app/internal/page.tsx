@@ -248,11 +248,20 @@ export default async function Internal() {
 
         <footer className="w-full mt-auto pt-8 pb-4 flex items-center justify-center border-t border-zinc-200 dark:border-zinc-800">
           <Image
-            src="/img/generic-logo.png"
+            src="/img/generic-logo-black.png"
             alt="Generic Protocol Logo"
             width={160}
             height={80}
             priority
+            className="block dark:hidden"
+          />
+          <Image
+            src="/img/generic-logo-white.png"
+            alt="Generic Protocol Logo"
+            width={160}
+            height={80}
+            priority
+            className="hidden dark:block"
           />
         </footer>
       </main>
