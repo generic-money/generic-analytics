@@ -7,6 +7,6 @@ export function getClient(chain: Chain = mainnet) {
       multicall: true,
     },
     chain: chain,
-    transport: http(chain == mainnet ? 'https://ethereum.publicnode.com' : chain.rpcUrls.default.http[0]),
+    transport: http(chain.id == 1 ? 'https://ethereum.publicnode.com' : chain.rpcUrls.default.http[0]),
   })
 }
