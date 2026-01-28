@@ -2,7 +2,6 @@ import { VaultKey, VaultContract } from '@/app/types/vaults';
 import { AssetKey, AssetContract } from '@/app/types/assets';
 import { PriceFeedKey } from '@/app/types/priceFeeds';
 import { Contract, ValueContract } from '@/app/types/common';
-import { chainConfig } from 'viem/zksync';
 
 export const CONTRACTS = {
   ethereum: {
@@ -142,41 +141,71 @@ export const DUNE_QUERIES = {
   predepositsInTime: 6535610
 } as const
 
-export type YieldDestinationId =
-  | 'generic-fee'
-  | 'ethereum'
-  | 'citrea-staked'
-  | 'citrea-unstaked'
-  | 'status-predeposit'
+export type YieldDestinationKey = 'generic' | 'ethereum' | 'status' | 'citrea';
 
-export const YIELD_DESTINATIONS: Record<YieldDestinationId, {
-  address: string
+export interface YieldDestination {
   chainId: number
   name: string
-}> = {
-  'generic-fee': {
-    address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17',
+  address: string
+  destinations: YieldDestinationValue[]
+}
+
+export interface YieldDestinationValue {
+  id: string
+  name: string
+  address: string
+}
+
+export const YIELD_DESTINATIONS = {
+  generic: {
     chainId: 1,
     name: 'Generic Fee',
+    destinations: [
+      {
+        id: 'generic-fee',
+        name: 'Generic DAO',
+        address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17',
+      }
+    ]
   },
-  'ethereum': {
-    address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17',
+  ethereum: {
     chainId: 1,
     name: 'Ethereum',
+    destinations: [
+      {
+        id: 'ethereum',
+        name: 'Generic DAO',
+        address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17',
+      }
+    ]
   },
-  'citrea-staked': {
-    address: '0x4Fb03AfE959394DB9C4E312A89C6e485FB3732d1',
-    chainId: 4114,
-    name: 'Citrea Staked',
-  },
-  'citrea-unstaked': {
-    address: '0x0000000000000000000000000000000000000000',
-    chainId: 4114,
-    name: 'Citrea Unstaked',
-  },
-  'status-predeposit': {
-    address: '0x0000000000000000000000000000000000000000',
+  status: {
     chainId: 1,
-    name: 'Status Predeposit',
+    name: 'StatusL2 (Predeposit)',
+    destinations: [
+      {
+        id: 'status-predeposit',
+        name: 'Status Predeposit Safe',
+        address: '0x0000000000000000000000000000000000000000',
+      }
+    ]
   },
-} as const
+  citrea: {
+    chainId: 4114,
+    name: 'Citrea',
+    destinations: [
+      {
+        id: 'citrea-staked',
+        name: 'Citrea Savings GUSD',
+        address: '0x4Fb03AfE959394DB9C4E312A89C6e485FB3732d1',
+      },
+      {
+        id: 'citrea-unstaked',
+        name: 'Citrea Team Safe',
+        address: '0x0000000000000000000000000000000000000000',
+      }
+    ]
+  }
+} as Record<YieldDestinationKey, YieldDestination>;
+
+export const GENERIC_FEE_PERCENTAGE = 10; // 10% protocol fee
