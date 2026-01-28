@@ -75,7 +75,7 @@ export default function YieldDistributionCalculator() {
   const getChainPrefix = (chainId: number) => {
     switch (chainId) {
       case 1: return 'eth:'
-      case 4114: return 'ctr:'
+      case 4114: return 'citrea-mainnet:'
       default: return `chain${chainId}:`
     }
   }
@@ -104,19 +104,14 @@ export default function YieldDistributionCalculator() {
     const citreaStakedYield = chainSupplies.citrea > 0 ? (chainSupplies.citreaStaked / chainSupplies.citrea) * citreaYield : 0
     const citreaUnstakedYield = chainSupplies.citrea > 0 ? (chainSupplies.citreaUnstaked / chainSupplies.citrea) * citreaYield : 0
 
-    const chains: ChainYield[] = [
-      {
-        name: 'Generic Fee',
-        supply: 0, // Not based on supply
-        yieldAmount: genericFee,
-        destinationId: getDestinationId('Generic Fee'),
-      },
-      {
-        name: 'Ethereum',
-        supply: chainSupplies.ethereum,
-        yieldAmount: chainSupplies.total > 0 ? (chainSupplies.ethereum / chainSupplies.total) * yieldAfterFee : 0,
-        destinationId: getDestinationId('Ethereum'),
-      },
+    const genericFeeChain: ChainYield = {
+      name: 'Generic Fee',
+      supply: 0, // Not based on supply
+      yieldAmount: genericFee,
+      destinationId: getDestinationId('Generic Fee'),
+    }
+
+    const otherChains: ChainYield[] = [
       {
         name: 'Citrea',
         supply: chainSupplies.citrea,
@@ -134,7 +129,25 @@ export default function YieldDistributionCalculator() {
         yieldAmount: chainSupplies.total > 0 ? (chainSupplies.status / chainSupplies.total) * yieldAfterFee : 0,
         destinationId: getDestinationId('Status L2 (Predeposit)'),
       },
+      {
+        name: 'Ethereum',
+        supply: chainSupplies.ethereum,
+        yieldAmount: chainSupplies.total > 0 ? (chainSupplies.ethereum / chainSupplies.total) * yieldAfterFee : 0,
+        destinationId: getDestinationId('Ethereum'),
+      },
     ]
+
+    // Sort other chains by yield amount (descending)
+    otherChains.sort((a, b) => {
+      // If both yields are 0, sort by supply instead
+      if (a.yieldAmount === 0 && b.yieldAmount === 0) {
+        return b.supply - a.supply
+      }
+      return b.yieldAmount - a.yieldAmount
+    })
+
+    // Generic Fee always at top, followed by sorted chains
+    const chains = [genericFeeChain, ...otherChains]
 
     console.log('New chains:', chains)
     // Force a new array reference to ensure React detects the change
@@ -293,19 +306,14 @@ export default function YieldDistributionCalculator() {
       })
 
       // Calculate yield distribution proportionally to all chains
-      const chains: ChainYield[] = [
-        {
-          name: 'Generic Fee',
-          supply: 0, // Not based on supply
-          yieldAmount: 0,
-          destinationId: getDestinationId('Generic Fee'),
-        },
-        {
-          name: 'Ethereum',
-          supply: ethereumSupply,
-          yieldAmount: 0,
-          destinationId: getDestinationId('Ethereum'),
-        },
+      const genericFeeChain: ChainYield = {
+        name: 'Generic Fee',
+        supply: 0, // Not based on supply
+        yieldAmount: 0,
+        destinationId: getDestinationId('Generic Fee'),
+      }
+
+      const otherChains: ChainYield[] = [
         {
           name: 'Citrea',
           supply: citreaUnitSupply,
@@ -323,7 +331,25 @@ export default function YieldDistributionCalculator() {
           yieldAmount: 0,
           destinationId: getDestinationId('Status L2 (Predeposit)'),
         },
+        {
+          name: 'Ethereum',
+          supply: ethereumSupply,
+          yieldAmount: 0,
+          destinationId: getDestinationId('Ethereum'),
+        },
       ]
+
+      // Sort other chains by yield amount (descending) - all 0 initially, so sort by supply
+      otherChains.sort((a, b) => {
+        // If both yields are 0, sort by supply instead
+        if (a.yieldAmount === 0 && b.yieldAmount === 0) {
+          return b.supply - a.supply
+        }
+        return b.yieldAmount - a.yieldAmount
+      })
+
+      // Generic Fee always at top, followed by sorted chains
+      const chains = [genericFeeChain, ...otherChains]
 
       setResults(chains)
     } catch (error) {
@@ -492,34 +518,9 @@ export default function YieldDistributionCalculator() {
                       </div>
                     )}
 
-                    {/* Yield Destination */}
-                    {chain.name !== 'Citrea' && chain.destinationId && (() => {
-                      const destination = getDestination(chain.destinationId)
-                      return (
-                        <div className="mt-4 pt-4 border-t border-zinc-300 dark:border-zinc-700 space-y-2">
-                          <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Yield Destination</h4>
-                          <div className="pl-3 space-y-1">
-                            <div className="flex items-start text-xs">
-                              <span className="text-zinc-500 dark:text-zinc-500 mr-1 font-semibold">{getChainPrefix(destination.chainId)}</span>
-                              <span className="font-mono text-zinc-500 dark:text-zinc-500 break-all flex-1">
-                                {destination.address}
-                              </span>
-                            </div>
-                            {destination.needsBridge && (
-                              <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                                <span>Requires bridging to {getChainName(destination.chainId)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })()}
-
-                    {/* Citrea Breakdown: Staked vs Unstaked */}
-                    {chain.name === 'Citrea' && chain.breakdown && chainSupplies && (
+                    {/* Distribution Breakdown - Consistent for all chains */}
+                    {chain.name === 'Citrea' && chain.breakdown && chainSupplies ? (
+                      // Citrea has multiple distribution items
                       <div className="mt-4 pt-4 border-t border-zinc-300 dark:border-zinc-700 space-y-3">
                         <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Distribution Breakdown</h4>
 
@@ -609,7 +610,42 @@ export default function YieldDistributionCalculator() {
                           </div>
                         </div>
                       </div>
-                    )}
+                    ) : chain.destinationId && (() => {
+                      // All other chains have single distribution item
+                      const destination = getDestination(chain.destinationId)
+                      return (
+                        <div className="mt-4 pt-4 border-t border-zinc-300 dark:border-zinc-700 space-y-3">
+                          <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Distribution Breakdown</h4>
+
+                          <div className="pl-3">
+                            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-800">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm text-zinc-600 dark:text-zinc-400">{destination.name}:</span>
+                                <span className="text-sm font-mono font-semibold text-green-600 dark:text-green-400">
+                                  ${chain.yieldAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700 space-y-1">
+                                <div className="flex items-start text-xs">
+                                  <span className="text-zinc-500 dark:text-zinc-500 mr-1 font-semibold">{getChainPrefix(destination.chainId)}</span>
+                                  <span className="font-mono text-zinc-500 dark:text-zinc-500 break-all flex-1">
+                                    {destination.address}
+                                  </span>
+                                </div>
+                                {destination.needsBridge && (
+                                  <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    <span>Bridge to {getChainName(destination.chainId)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })()}
                   </div>
                 </div>
               ))}
