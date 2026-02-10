@@ -129,6 +129,10 @@ export default async function Internal() {
     },
   } as Record<AssetKey, VaultItemInternalProps>
 
+  const protocolApy = internalVaultsData.usdc.apy * (usdcTotalAssets * usdcPrice / totalVaultValue)
+                    + internalVaultsData.usdt.apy * (usdtTotalAssets * usdtPrice / totalVaultValue)
+                    + internalVaultsData.usds.apy * (usdsTotalAssets * usdsPrice / totalVaultValue);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-900">
       <main className="flex min-h-screen w-full max-w-6xl flex-col items-center py-6 px-6 bg-white dark:bg-black sm:items-start">
@@ -148,8 +152,8 @@ export default async function Internal() {
             value={`${overcollateralization.toFixed(4)}%`}
           />
           <MainValueItem
-            label="GUSD Price"
-            value={`$${redemptionPrice.toLocaleString('en-US', { maximumFractionDigits: 4 })}`}
+            label="Protocol APY"
+            value={`${protocolApy.toFixed(4)}%`}
           />
         </div>
 
