@@ -4,7 +4,7 @@ import { mainnet } from 'viem/chains'
 import { citrea } from '../../config/chains/citrea'
 import * as dune from '../actions/dune'
 import * as rpc from '../actions/rpc'
-import * as graphql from '../actions/graphql'
+import * as rest from '../actions/rest'
 import ChangeInTimeBar from '../components/ChangeInTimeBar'
 import UnitsInTimeLine from '../components/UnitsInTimeLine'
 import VaultItem from '../components/VaultItem'
@@ -52,6 +52,10 @@ export default async function Internal() {
     usdcStrategyData,
     usdtStrategyData,
     usdsSSR,
+
+    usdcRewards,
+    usdtRewards,
+    usdsRewards,
   ] = await Promise.all([
     rpc.fetchTotalSupply(CONTRACTS.ethereum.assets.unit, mainnet),
     rpc.fetchTotalSupply(CONTRACTS.citrea.assets.unit, citrea),
@@ -82,9 +86,13 @@ export default async function Internal() {
 
     rpc.fetchTotalPredeposits(CONTRACTS.ethereum.predeposits.status.nickname),
 
-    graphql.fetchMorphoVaultV1(CONTRACTS.ethereum.vaults.usdc.strategy.address),
-    graphql.fetchMorphoVaultV1(CONTRACTS.ethereum.vaults.usdt.strategy.address),
+    rest.fetchMorphoVaultV1(CONTRACTS.ethereum.vaults.usdc),
+    rest.fetchMorphoVaultV1(CONTRACTS.ethereum.vaults.usdt),
     rpc.fetchSSR(),
+
+    rest.fetchMerkleRewards(CONTRACTS.ethereum.vaults.usdc),
+    rest.fetchMerkleRewards(CONTRACTS.ethereum.vaults.usdt),
+    rest.fetchMerkleRewards(CONTRACTS.ethereum.vaults.usds),
   ])
 
   const unitsInTime = await dune.fetchUnitsInTime()
@@ -95,6 +103,7 @@ export default async function Internal() {
 
   const internalVaultsData = {
     usdc: {
+      rewards: usdcRewards,
       apy: usdcStrategyData.data.vaultByAddress.state.avgNetApy * 100,
       allocated: (usdcTotalAssets - usdcVaultBalance) / usdcTotalAssets * 100,
       available: (usdcAdditionalAvailableAssets + usdcVaultBalance) / usdcTotalAssets * 100,
@@ -106,6 +115,7 @@ export default async function Internal() {
       autodepositThreshold: usdcVaultAutoDepositThreshold,
     },
     usdt: {
+      rewards: usdtRewards,
       apy: usdtStrategyData.data.vaultByAddress.state.avgNetApy * 100,
       allocated: (usdtTotalAssets - usdtVaultBalance) / usdtTotalAssets * 100,
       available: (usdtAdditionalAvailableAssets + usdtVaultBalance) / usdtTotalAssets * 100,
@@ -117,6 +127,7 @@ export default async function Internal() {
       autodepositThreshold: usdtVaultAutoDepositThreshold,
     },
     usds: {
+      rewards: usdsRewards,
       apy: usdsSSR * 100,
       allocated: (usdsTotalAssets - usdsVaultBalance) / usdsTotalAssets * 100,
       available: (usdsAdditionalAvailableAssets + usdsVaultBalance) / usdsTotalAssets * 100,

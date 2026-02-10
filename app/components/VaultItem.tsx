@@ -12,6 +12,14 @@ interface VaultItemProps {
 }
 
 export interface VaultItemInternalProps {
+  apy: number;
+  rewards: {
+    amount: number;
+    token: {
+      symbol: string;
+      price: number;
+    }
+  }[];
   allocated: number;
   available: number;
   mintSlippage: number;
@@ -110,6 +118,24 @@ export default function VaultItem(props: VaultItemProps) {
                   {props.internal.available.toFixed(0)}%
                 </span>
               </div>
+            </div>
+
+            {/* Rewards */}
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Merkle Rewards</div>
+
+              {props.internal.rewards.length > 0 ? (
+                props.internal.rewards.map((reward, index) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400">{reward.token.symbol}</span>
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      {reward.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })} ({(reward.amount * reward.token.price).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })})
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-zinc-600 dark:text-zinc-400">No rewards</div>
+              )}
             </div>
 
             {/* Slippage */}
