@@ -143,9 +143,9 @@ export default async function Internal() {
     },
   } as Record<AssetKey, VaultItemInternalProps>
 
-  const protocolApy = internalVaultsData.usdc.apy * (usdcTotalAssets * usdcPrice / totalVaultValue)
-                    + internalVaultsData.usdt.apy * (usdtTotalAssets * usdtPrice / totalVaultValue)
-                    + internalVaultsData.usds.apy * (usdsTotalAssets * usdsPrice / totalVaultValue);
+  const protocolApy = internalVaultsData.usdc.apy * internalVaultsData.usdc.currentProportionality / 100
+                    + internalVaultsData.usdt.apy * internalVaultsData.usdt.currentProportionality / 100
+                    + internalVaultsData.usds.apy * internalVaultsData.usds.currentProportionality / 100;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-zinc-900">
