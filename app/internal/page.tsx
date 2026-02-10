@@ -112,6 +112,7 @@ export default async function Internal() {
       maxCapacity: usdcVaultSettings.maxCapacity,
       minProportionality: usdcVaultSettings.minProportionality,
       maxProportionality: usdcVaultSettings.maxProportionality,
+      currentProportionality: (usdcTotalAssets * usdcPrice) / totalVaultValue * 100,
       autodepositThreshold: usdcVaultAutoDepositThreshold,
     },
     usdt: {
@@ -124,6 +125,7 @@ export default async function Internal() {
       maxCapacity: usdtVaultSettings.maxCapacity,
       minProportionality: usdtVaultSettings.minProportionality,
       maxProportionality: usdtVaultSettings.maxProportionality,
+      currentProportionality: (usdtTotalAssets * usdtPrice) / totalVaultValue * 100,
       autodepositThreshold: usdtVaultAutoDepositThreshold,
     },
     usds: {
@@ -136,6 +138,7 @@ export default async function Internal() {
       maxCapacity: usdsVaultSettings.maxCapacity,
       minProportionality: usdsVaultSettings.minProportionality,
       maxProportionality: usdsVaultSettings.maxProportionality,
+      currentProportionality: (usdsTotalAssets * usdsPrice) / totalVaultValue * 100,
       autodepositThreshold: usdsVaultAutoDepositThreshold,
     },
   } as Record<AssetKey, VaultItemInternalProps>

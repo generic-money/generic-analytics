@@ -27,6 +27,7 @@ export interface VaultItemInternalProps {
   maxCapacity: number;
   minProportionality: number;
   maxProportionality: number;
+  currentProportionality: number;
   autodepositThreshold: number;
 }
 
@@ -168,6 +169,12 @@ export default function VaultItem(props: VaultItemProps) {
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Proportionality Range</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {props.internal.minProportionality.toFixed(0)}% - {props.internal.maxProportionality.toFixed(0)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Current Proportionality</span>
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  {props.internal.currentProportionality.toFixed(0)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
