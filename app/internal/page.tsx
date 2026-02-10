@@ -4,6 +4,7 @@ import { mainnet } from 'viem/chains'
 import { citrea } from '../../config/chains/citrea'
 import * as dune from '../actions/dune'
 import * as rpc from '../actions/rpc'
+import * as graphql from '../actions/graphql'
 import ChangeInTimeBar from '../components/ChangeInTimeBar'
 import UnitsInTimeLine from '../components/UnitsInTimeLine'
 import VaultItem from '../components/VaultItem'
@@ -47,6 +48,10 @@ export default async function Internal() {
     redemptionPrice,
     // bridgeCoordinator
     statusPredeposits,
+    // morpho
+    usdcStrategyData,
+    usdtStrategyData,
+    usdsSSR,
   ] = await Promise.all([
     rpc.fetchTotalSupply(CONTRACTS.ethereum.assets.unit, mainnet),
     rpc.fetchTotalSupply(CONTRACTS.citrea.assets.unit, citrea),
@@ -76,6 +81,10 @@ export default async function Internal() {
     rpc.fetchShareRedemptionPrice(),
 
     rpc.fetchTotalPredeposits(CONTRACTS.ethereum.predeposits.status.nickname),
+
+    graphql.fetchMorphoVaultV1(CONTRACTS.ethereum.vaults.usdc.strategy.address),
+    graphql.fetchMorphoVaultV1(CONTRACTS.ethereum.vaults.usdt.strategy.address),
+    rpc.fetchSSR(),
   ])
 
   const unitsInTime = await dune.fetchUnitsInTime()
@@ -86,6 +95,7 @@ export default async function Internal() {
 
   const internalVaultsData = {
     usdc: {
+      apy: usdcStrategyData.data.vaultByAddress.state.avgNetApy * 100,
       allocated: (usdcTotalAssets - usdcVaultBalance) / usdcTotalAssets * 100,
       available: (usdcAdditionalAvailableAssets + usdcVaultBalance) / usdcTotalAssets * 100,
       mintSlippage: usdcPrice <= 1 ? 0 : (usdcPrice - 1) * 100,
@@ -96,6 +106,7 @@ export default async function Internal() {
       autodepositThreshold: usdcVaultAutoDepositThreshold,
     },
     usdt: {
+      apy: usdtStrategyData.data.vaultByAddress.state.avgNetApy * 100,
       allocated: (usdtTotalAssets - usdtVaultBalance) / usdtTotalAssets * 100,
       available: (usdtAdditionalAvailableAssets + usdtVaultBalance) / usdtTotalAssets * 100,
       mintSlippage: usdtPrice <= 1 ? 0 : (usdtPrice - 1) * 100,
@@ -106,6 +117,7 @@ export default async function Internal() {
       autodepositThreshold: usdtVaultAutoDepositThreshold,
     },
     usds: {
+      apy: usdsSSR * 100,
       allocated: (usdsTotalAssets - usdsVaultBalance) / usdsTotalAssets * 100,
       available: (usdsAdditionalAvailableAssets + usdsVaultBalance) / usdsTotalAssets * 100,
       mintSlippage: usdsPrice <= 1 ? 0 : (usdsPrice - 1) * 100,

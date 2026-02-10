@@ -89,9 +89,15 @@ export default function VaultItem(props: VaultItemProps) {
 
         {props.internal && (
           <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
-            {/* Allocation */}
+            {/* Strategy */}
             <div className="space-y-1">
-              <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Allocation</div>
+              <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Strategy</div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">APY</span>
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  {props.internal.apy.toFixed(2)}%
+                </span>
+              </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Allocated</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
