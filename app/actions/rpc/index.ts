@@ -2,5 +2,6 @@ export { fetchVaultSettings, fetchShareRedemptionPrice, fetchSafetyBufferYieldDe
 export { fetchTotalSupply, fetchBalanceOf } from './erc20'
 export { fetchPrice } from './priceFeed'
 export { fetchTotalAssets, fetchAutoDepositThreshold, fetchAdditionalAvailableAssets } from './vault'
-export { fetchTotalPredeposits } from './bridgeCoordinator'
+export { fetchTotalPredeposits, fetchEncodeBridgeMessage } from './bridgeCoordinator'
 export { fetchSSR } from './susds'
+export { fetchEstimateBridgeFee } from './bridgeAdapter'
