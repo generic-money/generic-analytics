@@ -6,6 +6,7 @@ import * as rpc from '@/app/actions/rpc'
 import { GENERIC_FEE_PERCENTAGE, CONTRACTS, YIELD_DESTINATIONS, type YieldDestinationKey, type YieldDestination, type YieldDestinationValue } from '@/config/constants'
 import { mainnet } from 'viem/chains'
 import { citrea } from '@/config/chains/citrea'
+import { downloadTxBatch } from './buildTxBatch'
 
 interface DestinationBreakdown {
   destination: YieldDestinationValue
@@ -216,37 +217,8 @@ export default function YieldDistributionCalculator() {
   const downloadDistribution = () => {
     if (!results) return
 
-    // Helper function to convert to 18 decimal wei format
-    const toWei = (value: number): string => {
-      return BigInt(Math.floor(value * 1e18)).toString()
-    }
-
-    const distributionData = results.map(chain => ({
-      name: YIELD_DESTINATIONS[chain.key].name,
-      supply: toWei(chain.supply),
-      yieldAmount: toWei(chain.yieldAmount),
-      proportion: chainSupplies ? ((chain.supply / chainSupplies.total) * 100).toFixed(18) : '0'
-    }))
-
-    const jsonData = {
-      timestamp: new Date().toISOString(),
-      totalCollateralValue: toWei(collateralValue),
-      totalUnitSupply: toWei(unitSupply),
-      totalDistributableYield: toWei(totalYield),
-      yieldToDistribute: toWei(getDistributedYield()),
-      undistributedYield: toWei(getUndistributedYield()),
-      chains: distributionData
-    }
-
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `yield-distribution-${Date.now()}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    const distributedYield = getDistributedYield()
+    downloadTxBatch(results, totalYield, distributedYield)
   }
 
   const calculateYieldDistribution = async () => {
@@ -497,7 +469,7 @@ export default function YieldDistributionCalculator() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Download Distribution (JSON)
+                  Download Aragon DAO Transactions
                 </button>
               </div>
             </div>
@@ -593,19 +565,50 @@ export default function YieldDistributionCalculator() {
                                       </svg>
                                       <span>Missing Address</span>
                                     </div>
-                                  ) : YIELD_DESTINATIONS[chain.key].chainId !== 1 ? (
-                                    <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                      </svg>
-                                      <span>Bridge to {getChainName(YIELD_DESTINATIONS[chain.key].chainId)}</span>
-                                    </div>
                                   ) : null}
                                 </div>
                               </div>
                             )
                           })}
                         </div>
+
+                        {/* Show distributor address for chains that need bridging */}
+                        {YIELD_DESTINATIONS[chain.key].chainId !== 1 && (() => {
+                          const hasDistributor = YIELD_DESTINATIONS[chain.key].distributor
+                          const distributorAddress = hasDistributor ? YIELD_DESTINATIONS[chain.key].distributor!.address : '0x0000000000000000000000000000000000000000'
+                          const bridgeType = hasDistributor ? YIELD_DESTINATIONS[chain.key].distributor!.bridgeType : undefined
+                          const bridgeTypeName = bridgeType === 1 ? 'LayerZero' : bridgeType === 2 ? 'Linea' : 'Unknown'
+                          const isZeroAddress = !hasDistributor || distributorAddress === '0x0000000000000000000000000000000000000000'
+
+                          return (
+                            <div className={`p-3 rounded border ${isZeroAddress ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'}`}>
+                              <div className={`flex items-center gap-1 text-xs mb-2 ${isZeroAddress ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isZeroAddress ? "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" : "M13 10V3L4 14h7v7l9-11h-7z"} />
+                                </svg>
+                                <span className="font-semibold">
+                                  {isZeroAddress ? 'Missing Distributor' : `Bridge to ${getChainName(YIELD_DESTINATIONS[chain.key].chainId)}`}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex items-start text-xs">
+                                  <span className="text-zinc-600 dark:text-zinc-400 mr-1 font-semibold whitespace-nowrap">Distributor:</span>
+                                  <span className={`font-mono break-all flex-1 ${isZeroAddress ? 'text-red-600 dark:text-red-400' : 'text-zinc-500 dark:text-zinc-500'}`}>
+                                    {distributorAddress}
+                                  </span>
+                                </div>
+                                {bridgeType !== undefined && (
+                                  <div className="flex items-start text-xs">
+                                    <span className="text-zinc-600 dark:text-zinc-400 mr-1 font-semibold whitespace-nowrap">Bridge Type:</span>
+                                    <span className="text-zinc-500 dark:text-zinc-500">
+                                      {bridgeType} ({bridgeTypeName})
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })()}
                       </div>
                     )}
                   </div>

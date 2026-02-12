@@ -11,6 +11,9 @@ export const CONTRACTS = {
     bridgeCoordinator: {
       address: '0x0503F2C5A1a4b72450c6Cfa790F2097CF5cB6a01' as const,
     } as Contract,
+    dao: {
+      address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17' as const,
+    } as Contract,
     vaults: {
       usdc: {
         address: '0x4825eFF24F9B7b76EEAFA2ecc6A1D5dFCb3c1c3f' as const,
@@ -40,6 +43,16 @@ export const CONTRACTS = {
     assets: {
       unit: {
         address: '0x8c307baDbd78bEa5A1cCF9677caa58e7A2172502' as const,
+        decimals: 18,
+        metadata: {
+          iconSrc: '/img/gusd.png',
+          symbol: 'GUSD',
+          name: 'Generic Unit',
+          color: '#3F79FF',
+        }
+      },
+      gusd: {
+        address: '0xece811d35f79C4868a2B911E55D9aa0821399EDF' as const,
         decimals: 18,
         metadata: {
           iconSrc: '/img/gusd.png',
@@ -119,6 +132,16 @@ export const CONTRACTS = {
           color: '#3F79FF',
         }
       } as AssetContract,
+      gusd: {
+        address: '0xAC8c1AEB584765DB16ac3e08D4736CFcE198589B' as const,
+        decimals: 18,
+        metadata: {
+          iconSrc: '/img/gusd.png',
+          symbol: 'GUSD',
+          name: 'GUSD',
+          color: '#3F79FF',
+        }
+      } as AssetContract,
       sgusd: {
         address: '0x4Fb03AfE959394DB9C4E312A89C6e485FB3732d1' as const,
         decimals: 18,
@@ -147,6 +170,7 @@ export interface YieldDestination {
   chainId: number
   name: string
   address: string
+  distributor?: PeripheryDistributor
   destinations: YieldDestinationValue[]
 }
 
@@ -154,6 +178,12 @@ export interface YieldDestinationValue {
   id: string
   name: string
   address: string
+}
+
+export interface PeripheryDistributor {
+  address: string
+  bridgeType: number
+  whitelabel: AssetContract
 }
 
 export const YIELD_DESTINATIONS = {
@@ -193,6 +223,11 @@ export const YIELD_DESTINATIONS = {
   citrea: {
     chainId: 4114,
     name: 'Citrea',
+    distributor: {
+      address: '0x41Cf323D4DCe797493Ec70AB3Da93E0c92dd679C',
+      bridgeType: 1,
+      whitelabel: CONTRACTS.citrea.assets.gusd,
+    },
     destinations: [
       {
         id: 'citrea-staked',
