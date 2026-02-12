@@ -182,7 +182,7 @@ export interface YieldDestinationValue {
 
 export interface PeripheryDistributor {
   address: string
-  bridgeType: number
+  bridge: BridgeAdapter
   whitelabel: AssetContract
 }
 
@@ -194,7 +194,7 @@ export const YIELD_DESTINATIONS = {
       {
         id: 'generic-fee',
         name: 'Generic DAO',
-        address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17',
+        address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17' as const,
       }
     ]
   },
@@ -205,7 +205,7 @@ export const YIELD_DESTINATIONS = {
       {
         id: 'ethereum',
         name: 'Generic DAO',
-        address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17',
+        address: '0x3794d7f91b3Dd3b338FEe671aC6AA42BEA5e3D17' as const,
       }
     ]
   },
@@ -216,7 +216,7 @@ export const YIELD_DESTINATIONS = {
       {
         id: 'status-predeposit',
         name: 'Status Predeposit Safe',
-        address: '0x0000000000000000000000000000000000000000',
+        address: '0x0000000000000000000000000000000000000000' as const,
       }
     ]
   },
@@ -224,20 +224,20 @@ export const YIELD_DESTINATIONS = {
     chainId: 4114,
     name: 'Citrea',
     distributor: {
-      address: '0x41Cf323D4DCe797493Ec70AB3Da93E0c92dd679C',
-      bridgeType: 1,
+      address: '0x41Cf323D4DCe797493Ec70AB3Da93E0c92dd679C' as const,
+      bridge: BRIDGE_ADAPTERS.layerZero,
       whitelabel: CONTRACTS.citrea.assets.gusd,
     },
     destinations: [
       {
         id: 'citrea-staked',
         name: 'Citrea Staked GUSD',
-        address: '0x4Fb03AfE959394DB9C4E312A89C6e485FB3732d1',
+        address: '0x4Fb03AfE959394DB9C4E312A89C6e485FB3732d1' as const,
       },
       {
         id: 'citrea-unstaked',
         name: 'Citrea Team Safe',
-        address: '0x0000000000000000000000000000000000000000',
+        address: '0x0000000000000000000000000000000000000000' as const,
       }
     ]
   }

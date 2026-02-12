@@ -1,9 +1,8 @@
 import { encodeFunctionData, Address, parseUnits } from 'viem'
 import { controllerAbi } from '@/public/abi/Controller.abi'
-import { genericUnitAbi } from '@/public/abi/GenericUnit.abi'
 import { genericUSDAbi } from '@/public/abi/GenericUSD.abi'
 import { bridgeCoordinatorL1Abi } from '@/public/abi/BridgeCoordinatorL1.abi'
-import { CONTRACTS, YIELD_DESTINATIONS, type YieldDestinationKey } from '@/config/constants'
+import { BridgeAdapter, CONTRACTS, YIELD_DESTINATIONS, type YieldDestinationKey } from '@/config/constants'
 
 export interface TxBuilderTransaction {
   to: Address
@@ -129,8 +128,8 @@ export function buildYieldDistributionTxBatch(
   // Map chainId -> remoteRecipient (distributor or first destination on that chain)
   const bridgeRecipientsByChain = new Map<number, string>()
 
-  // Map chainId -> bridgeType (from distributor config)
-  const bridgeTypesByChain = new Map<number, number>()
+  // Map chainId -> bridge (from distributor config)
+  const bridgeByChain = new Map<number, BridgeAdapter>()
 
   // Map chainId -> destinationWhitelabel (from distributor config)
   const destinationWhitelabelsByChain = new Map<number, string>()
@@ -145,14 +144,14 @@ export function buildYieldDistributionTxBatch(
       if (!yieldDest.distributor) {
         throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): No distributor configured for non-Ethereum chain`)
       }
-      if (!yieldDest.distributor.address || yieldDest.distributor.bridgeType === undefined) {
+      if (!yieldDest.distributor.address || yieldDest.distributor.bridge === undefined) {
         throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): Distributor is configured but missing address or bridgeType`)
       }
       if (!yieldDest.distributor.whitelabel?.address) {
         throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): Distributor is configured but missing whitelabel address`)
       }
       bridgeRecipientsByChain.set(yieldDest.chainId, yieldDest.distributor.address)
-      bridgeTypesByChain.set(yieldDest.chainId, yieldDest.distributor.bridgeType)
+      bridgeByChain.set(yieldDest.chainId, yieldDest.distributor.bridge)
       destinationWhitelabelsByChain.set(yieldDest.chainId, yieldDest.distributor.whitelabel.address)
 
       // Calculate total amount for this chain
@@ -174,15 +173,15 @@ export function buildYieldDistributionTxBatch(
   // Add bridge transactions
   for (const [chainId, amount] of bridgeAmountsByChain.entries()) {
     const remoteRecipient = bridgeRecipientsByChain.get(chainId)
-    const bridgeType = bridgeTypesByChain.get(chainId)
+    const bridge = bridgeByChain.get(chainId)
     const destinationWhitelabel = destinationWhitelabelsByChain.get(chainId)
 
     if (!remoteRecipient) {
       throw new Error(`No recipient found for chain ${chainId}`)
     }
 
-    if (bridgeType === undefined) {
-      throw new Error(`No bridge type found for chain ${chainId}`)
+    if (bridge === undefined) {
+      throw new Error(`No bridge found for chain ${chainId}`)
     }
 
     if (!destinationWhitelabel) {
@@ -199,7 +198,7 @@ export function buildYieldDistributionTxBatch(
       abi: bridgeCoordinatorL1Abi,
       functionName: 'bridge',
       args: [
-        bridgeType, // use configured bridgeType from distributor
+        bridge.id, // use configured bridgeType from distributor
         BigInt(chainId),
         CONTRACTS.ethereum.dao.address, // onBehalf
         remoteRecipientBytes32, // yield distributor

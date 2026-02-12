@@ -576,8 +576,7 @@ export default function YieldDistributionCalculator() {
                         {YIELD_DESTINATIONS[chain.key].chainId !== 1 && (() => {
                           const hasDistributor = YIELD_DESTINATIONS[chain.key].distributor
                           const distributorAddress = hasDistributor ? YIELD_DESTINATIONS[chain.key].distributor!.address : '0x0000000000000000000000000000000000000000'
-                          const bridgeType = hasDistributor ? YIELD_DESTINATIONS[chain.key].distributor!.bridgeType : undefined
-                          const bridgeTypeName = bridgeType === 1 ? 'LayerZero' : bridgeType === 2 ? 'Linea' : 'Unknown'
+                          const bridge = hasDistributor ? YIELD_DESTINATIONS[chain.key].distributor!.bridge : undefined
                           const isZeroAddress = !hasDistributor || distributorAddress === '0x0000000000000000000000000000000000000000'
 
                           return (
@@ -597,11 +596,11 @@ export default function YieldDistributionCalculator() {
                                     {distributorAddress}
                                   </span>
                                 </div>
-                                {bridgeType !== undefined && (
+                                {bridge !== undefined && (
                                   <div className="flex items-start text-xs">
-                                    <span className="text-zinc-600 dark:text-zinc-400 mr-1 font-semibold whitespace-nowrap">Bridge Type:</span>
+                                    <span className="text-zinc-600 dark:text-zinc-400 mr-1 font-semibold whitespace-nowrap">Bridge:</span>
                                     <span className="text-zinc-500 dark:text-zinc-500">
-                                      {bridgeType} ({bridgeTypeName})
+                                      {bridge.name}
                                     </span>
                                   </div>
                                 )}
