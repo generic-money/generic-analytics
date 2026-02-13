@@ -70,56 +70,65 @@ export default function VaultItem(props: VaultItemProps) {
           </div>
         </div>
 
-        {/* Vault Address Section */}
-        <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800 space-y-1">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">Vault Address</span>
+        <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
+          {/* Vault Section */}
+          <div className="space-y-1">
+            <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Vault</div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Address</span>
+              </div>
+              <a
+                href={`https://eth.blockscout.com/address/${props.mandatory.vaultAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-mono text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {props.mandatory.vaultAddress.slice(0, 6)}...{props.mandatory.vaultAddress.slice(-4)}
+              </a>
             </div>
-            <a
-              href={`https://eth.blockscout.com/address/${props.mandatory.vaultAddress}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-mono text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              {props.mandatory.vaultAddress.slice(0, 6)}...{props.mandatory.vaultAddress.slice(-4)}
-            </a>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">Strategy Address</span>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-zinc-600 dark:text-zinc-400">Proportionality</span>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {props.mandatory.currentProportionality.toFixed(0)}%
+              </span>
             </div>
-            <a
-              href={`https://eth.blockscout.com/address/${props.mandatory.strategyAddress}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-mono text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              {props.mandatory.strategyAddress.slice(0, 6)}...{props.mandatory.strategyAddress.slice(-4)}
-            </a>
           </div>
-        </div>
 
-        {/* Strategy Section - Always visible */}
-        <div className="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-800 space-y-1">
-          <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Strategy</div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-zinc-600 dark:text-zinc-400">APY</span>
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {props.mandatory.apy.toFixed(2)}%
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-zinc-600 dark:text-zinc-400">Allocated</span>
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {props.mandatory.allocated.toFixed(0)}%
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-zinc-600 dark:text-zinc-400">Available</span>
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {props.mandatory.available.toFixed(0)}%
-            </span>
+          {/* Strategy Section */}
+          <div className="space-y-1">
+            <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Strategy</div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Address</span>
+              </div>
+              <a
+                href={`https://eth.blockscout.com/address/${props.mandatory.strategyAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-mono text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {props.mandatory.strategyAddress.slice(0, 6)}...{props.mandatory.strategyAddress.slice(-4)}
+              </a>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-zinc-600 dark:text-zinc-400">APY</span>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {props.mandatory.apy.toFixed(2)}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-zinc-600 dark:text-zinc-400">Allocated</span>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {props.mandatory.allocated.toFixed(0)}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-zinc-600 dark:text-zinc-400">Available</span>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {props.mandatory.available.toFixed(0)}%
+              </span>
+            </div>
           </div>
         </div>
 
@@ -174,12 +183,6 @@ export default function VaultItem(props: VaultItemProps) {
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Proportionality Range</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {props.internal.minProportionality.toFixed(0)}% - {props.internal.maxProportionality.toFixed(0)}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-zinc-600 dark:text-zinc-400">Current Proportionality</span>
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {props.mandatory.currentProportionality.toFixed(0)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
