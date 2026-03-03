@@ -8,7 +8,8 @@ export async function fetchMerkleRewards(vault: VaultContract) {
     .then(data => data.find((entry: any) => entry.chain.id == 1)?.rewards || [])
     .then(rewards => rewards.map((reward: any) => ({
       amount: reward.amount / (10 ** reward.token.decimals),
-      pending: reward.pending,
+      claimed: reward.claimed / (10 ** reward.token.decimals),
+      pending: reward.pending / (10 ** reward.token.decimals),
       token: {
         symbol: reward.token.symbol,
         decimals: reward.token.decimals,
