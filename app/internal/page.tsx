@@ -172,6 +172,7 @@ export default async function Internal() {
       <main className="flex min-h-screen w-full max-w-6xl flex-col items-center py-6 px-6 bg-white dark:bg-black sm:items-start">
         <h1 className="w-full my-12 text-4xl font-bold text-zinc-900 dark:text-zinc-100">Generic Internal Analytics</h1>
 
+        {/* Main Section */}
         <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MainValueItem
             label="Total GUSD"
@@ -188,22 +189,6 @@ export default async function Internal() {
           <MainValueItem
             label="Protocol APY"
             value={`${protocolApy.toFixed(4)}%`}
-          />
-        </div>
-
-        <h2 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">Chains</h2>
-        <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <ValueItem
-            label='StatusL2 (Predeposit)'
-            value={statusPredeposits.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-          />
-          <ValueItem
-            label='Citrea (total / staked)'
-            value={citreaTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' / ' + citreaStakedGusdSupply.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-          />
-          <ValueItem
-            label='Ethereum'
-            value={(unitTotalSupply - (statusPredeposits + citreaTotalSupply)).toLocaleString('en-US', { maximumFractionDigits: 0 })}
           />
         </div>
 
@@ -224,6 +209,23 @@ export default async function Internal() {
               internal={internalVaultsData.usds}
             />
           </div>
+        </div>
+
+        {/* Chains Section */}
+        <h2 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">Chains</h2>
+        <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ValueItem
+            label='StatusL2 (Predeposit)'
+            value={statusPredeposits.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          />
+          <ValueItem
+            label='Citrea (total / staked)'
+            value={citreaTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' / ' + citreaStakedGusdSupply.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          />
+          <ValueItem
+            label='Ethereum'
+            value={(unitTotalSupply - (statusPredeposits + citreaTotalSupply)).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          />
         </div>
 
         {/* Units In Time Chart Section */}
