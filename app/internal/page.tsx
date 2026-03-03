@@ -246,7 +246,7 @@ export default async function Internal() {
                   id: 'Unit Tokens',
                   color: '#3F79FF',
                   data: unitsInTime.data.slice(-14).map(entry => ({
-                    x: entry.time.toLocaleString(),
+                    x: new Date(entry.time).toLocaleDateString(),
                     y: entry.units.toFixed(2)
                   }))
                 }
@@ -270,7 +270,7 @@ export default async function Internal() {
             <div style={{ height: '400px', width: '100%' }}>
               <ChangeInTimeBar
                 data={depositsInTime.data.slice(-14).map(entry => ({
-                  time: entry.time.toLocaleString(),
+                  time: new Date(entry.time).toLocaleDateString(),
                   usdc: Number(entry.usdc).toFixed(0),
                   usdt: Number(entry.usdt).toFixed(0),
                   usds: Number(entry.usds).toFixed(0),

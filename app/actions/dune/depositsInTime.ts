@@ -5,7 +5,7 @@ import { DUNE_QUERIES, CONTRACTS } from '@/config/constants'
 
 export async function fetchDepositsInTime() {
   return fetchDune(DUNE_QUERIES.depositsInTime, row => ({
-    time: new Date(String(row.time)).toLocaleDateString(),
+    time: String(row.time),
     usdc: Number(row.usdc) / 10 ** CONTRACTS.ethereum.assets.usdc.decimals,
     usdt: Number(row.usdt) / 10 ** CONTRACTS.ethereum.assets.usdt.decimals,
     usds: Number(row.usds) / 10 ** CONTRACTS.ethereum.assets.usds.decimals,

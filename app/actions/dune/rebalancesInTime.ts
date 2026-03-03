@@ -5,7 +5,7 @@ import { DUNE_QUERIES, CONTRACTS } from '@/config/constants'
 
 export async function fetchRebalancesInTime() {
   return fetchDune(DUNE_QUERIES.rebalancesInTime, row => ({
-    time: new Date(String(row.time)).toLocaleDateString(),
+    time: String(row.time),
     fromVault: row.fromVault,
     toVault: row.toVault,
     fromAmount: Number(row.fromAmount) / 10 ** getVaultDecimals(row.fromVault),

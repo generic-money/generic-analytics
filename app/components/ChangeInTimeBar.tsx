@@ -34,6 +34,7 @@ export default function ChangeInTimeBar({ data, indexBy, keys, colors }: ChangeI
             enableLabel={false}
             enableTotals={true}
             valueScale={{ type: 'linear',  min: 'auto', max: 'auto' }}
+            valueFormat={(value) => Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             theme={componentsTheme(isDark)}
             enableGridX={true}
             enableGridY={false}
@@ -64,7 +65,12 @@ export default function ChangeInTimeBar({ data, indexBy, keys, colors }: ChangeI
                 legend: 'Deposits',
                 legendOffset: -60,
                 legendPosition: 'middle',
-                format: (value) => `${(value / 1000).toFixed(0)}K`
+                format: (value) => {
+                  if (Math.abs(value) < 1000) return value;
+                  if (Math.abs(value) < 1_000_000) return (value / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'K';
+                  if (Math.abs(value) < 1_000_000_000) return (value / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'M';
+                  return (Math.abs(value) / 1_000_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'B';
+                }
             }}
             margin={{ top: 20, right: 70, bottom: 80, left: 70 }}
             borderRadius={4}

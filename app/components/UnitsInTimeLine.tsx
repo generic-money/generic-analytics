@@ -34,7 +34,7 @@ export default function UnitsInTimeLine({ data }: UnitsInTimeLineProps) {
                 stacked: false,
                 reverse: false
             }}
-            yFormat=" >-.2f"
+            yFormat={(value) => Number(value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             axisTop={null}
             axisRight={null}
             axisBottom={{
@@ -52,7 +52,12 @@ export default function UnitsInTimeLine({ data }: UnitsInTimeLineProps) {
                 legend: 'Unit Tokens',
                 legendOffset: -60,
                 legendPosition: 'middle',
-                format: (value: number) => `${(value / 1000).toFixed(0)}K`
+                format: (value: number) => {
+                  if (Math.abs(value) < 1000) return value;
+                  if (Math.abs(value) < 1_000_000) return (value / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'K';
+                  if (Math.abs(value) < 1_000_000_000) return (value / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'M';
+                  return (Math.abs(value) / 1_000_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'B';
+                }
             }}
             enableGridX={true}
             enableGridY={false}
