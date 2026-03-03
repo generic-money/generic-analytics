@@ -383,25 +383,25 @@ export default function YieldDistributionCalculator() {
                   <div className="flex justify-between">
                     <span className="text-zinc-600 dark:text-zinc-400">Total Collateral Value:</span>
                     <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                      ${collateralValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${collateralValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-600 dark:text-zinc-400">Total Unit Supply:</span>
                     <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                      {unitSupply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {unitSupply.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-600 dark:text-zinc-400">Safety Buffer Deduction:</span>
                     <span className="font-mono font-semibold text-amber-600 dark:text-amber-400">
-                      {safetyBuffer.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {safetyBuffer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-zinc-300 dark:border-zinc-700">
                     <span className="font-medium text-zinc-900 dark:text-zinc-100">Total Distributable Yield:</span>
                     <span className="font-mono font-bold text-green-600 dark:text-green-400">
-                      ${totalYield.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${totalYield.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
@@ -424,7 +424,7 @@ export default function YieldDistributionCalculator() {
                   className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                  Enter the amount of yield to distribute. Maximum: ${totalYield.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  Enter the amount of yield to distribute. Maximum: ${totalYield.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
                   Note: {GENERIC_FEE_PERCENTAGE}% protocol fee is collected before distribution to chains
@@ -433,13 +433,13 @@ export default function YieldDistributionCalculator() {
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">Yield to Distribute:</span>
                     <span className="text-sm font-mono font-semibold text-blue-600 dark:text-blue-400">
-                      ${getDistributedYield().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${getDistributedYield().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">Undistributed Yield:</span>
                     <span className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100">
-                      ${getUndistributedYield().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${getUndistributedYield().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
@@ -469,7 +469,7 @@ export default function YieldDistributionCalculator() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Download Aragon DAO Transactions
+                  Download Transaction JSONs (2)
                 </button>
               </div>
             </div>
@@ -490,14 +490,14 @@ export default function YieldDistributionCalculator() {
                       <div className="flex justify-between">
                         <span className="text-zinc-600 dark:text-zinc-400">Chain Supply:</span>
                         <span className="font-mono text-zinc-900 dark:text-zinc-100">
-                          {chain.supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {chain.supply.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span className="text-zinc-600 dark:text-zinc-400">Yield Amount:</span>
                       <span className="font-mono font-semibold text-green-600 dark:text-green-400">
-                        ${chain.yieldAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${chain.yieldAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
                     {chainSupplies && chainSupplies.total > 0 && chain.key !== 'generic' && (
@@ -531,7 +531,7 @@ export default function YieldDistributionCalculator() {
                                 <div className="flex justify-between items-center mb-1">
                                   <span className="text-sm text-zinc-600 dark:text-zinc-400">{destination.name}:</span>
                                   <span className={`text-sm font-mono font-semibold ${colorClass}`}>
-                                    ${breakdown.yieldAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    ${breakdown.yieldAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                   </span>
                                 </div>
                                 {/* Only show supply and proportion if there are multiple destinations */}
@@ -540,7 +540,7 @@ export default function YieldDistributionCalculator() {
                                     <div className="flex justify-between text-xs mb-0.5">
                                       <span className="text-zinc-500 dark:text-zinc-500">Supply:</span>
                                       <span className="font-mono text-zinc-500 dark:text-zinc-500">
-                                        {breakdown.supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        {breakdown.supply.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </span>
                                     </div>
                                     <div className="flex justify-between text-xs mb-2">

@@ -53,7 +53,7 @@ export default function VaultItem(props: VaultItemProps) {
         <div className="flex justify-between items-center">
           <span className="text-sm text-zinc-600 dark:text-zinc-400">Balance</span>
           <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            {props.mandatory.totalAssets.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+            {props.mandatory.totalAssets.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </span>
         </div>
         <div className="flex justify-between items-center">
@@ -67,7 +67,7 @@ export default function VaultItem(props: VaultItemProps) {
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Value</span>
             <span className="text-xl font-bold" style={{ color: props.mandatory.assetMetadata.color }}>
-              ${(props.mandatory.totalAssets * props.mandatory.price).toLocaleString('en-US', { maximumFractionDigits: 2 })}
+              ${(props.mandatory.totalAssets * props.mandatory.price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </span>
           </div>
         </div>
@@ -146,7 +146,7 @@ export default function VaultItem(props: VaultItemProps) {
                   <div key={index} className="flex justify-between items-center">
                     <span className="text-xs text-zinc-600 dark:text-zinc-400">{reward.token.symbol}</span>
                     <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                      {(reward.amount - reward.claimed).toLocaleString('en-US', { maximumFractionDigits: 2 })} ({((reward.amount - reward.claimed) * reward.token.price).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })})
+                      {(reward.amount - reward.claimed).toLocaleString(undefined, { maximumFractionDigits: 2 })} ({((reward.amount - reward.claimed) * reward.token.price).toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 })})
                     </span>
                   </div>
                 ))
@@ -178,7 +178,7 @@ export default function VaultItem(props: VaultItemProps) {
               <div className="flex justify-between items-center">
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Max Capacity</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {props.internal.maxCapacity.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  {props.internal.maxCapacity.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -190,7 +190,7 @@ export default function VaultItem(props: VaultItemProps) {
               <div className="flex justify-between items-center">
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">Autodeposit Threshold</span>
                 <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {props.internal.autodepositThreshold.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  {props.internal.autodepositThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
               </div>
             </div>

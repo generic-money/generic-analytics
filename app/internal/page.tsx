@@ -177,11 +177,11 @@ export default async function Internal() {
         <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MainValueItem
             label="Total GUSD"
-            value={unitTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            value={unitTotalSupply.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           />
           <MainValueItem
             label="Total Collateral Value"
-            value={`$${totalVaultValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+            value={`$${totalVaultValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
           />
           <MainValueItem
             label="Collateralization"
@@ -217,15 +217,15 @@ export default async function Internal() {
         <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <ValueItem
             label='StatusL2 (Predeposit)'
-            value={statusPredeposits.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            value={statusPredeposits.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           />
           <ValueItem
             label='Citrea (total / staked)'
-            value={citreaTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' / ' + citreaStakedGusdSupply.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            value={citreaTotalSupply.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' / ' + citreaStakedGusdSupply.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           />
           <ValueItem
             label='Ethereum'
-            value={(unitTotalSupply - (statusPredeposits + citreaTotalSupply)).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            value={(unitTotalSupply - (statusPredeposits + citreaTotalSupply)).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           />
         </div>
 
@@ -246,7 +246,7 @@ export default async function Internal() {
                   id: 'Unit Tokens',
                   color: '#3F79FF',
                   data: unitsInTime.data.slice(-14).map(entry => ({
-                    x: entry.time,
+                    x: entry.time.toLocaleString(),
                     y: entry.units.toFixed(2)
                   }))
                 }
@@ -270,7 +270,7 @@ export default async function Internal() {
             <div style={{ height: '400px', width: '100%' }}>
               <ChangeInTimeBar
                 data={depositsInTime.data.slice(-14).map(entry => ({
-                  time: entry.time,
+                  time: entry.time.toLocaleString(),
                   usdc: Number(entry.usdc).toFixed(0),
                   usdt: Number(entry.usdt).toFixed(0),
                   usds: Number(entry.usds).toFixed(0),
@@ -354,21 +354,21 @@ export default async function Internal() {
                         entry.usdc > 0 ? 'text-green-600 dark:text-green-400' :
                         'text-zinc-900 dark:text-zinc-100'
                       }`}>
-                        {entry.usdc.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                        {entry.usdc.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
                         entry.usdt < 0 ? 'text-red-600 dark:text-red-400' :
                         entry.usdt > 0 ? 'text-green-600 dark:text-green-400' :
                         'text-zinc-900 dark:text-zinc-100'
                       }`}>
-                        {entry.usdt.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                        {entry.usdt.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
                         entry.usds < 0 ? 'text-red-600 dark:text-red-400' :
                         entry.usds > 0 ? 'text-green-600 dark:text-green-400' :
                         'text-zinc-900 dark:text-zinc-100'
                       }`}>
-                        {entry.usds.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                        {entry.usds.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                         <a

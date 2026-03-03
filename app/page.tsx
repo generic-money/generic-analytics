@@ -107,11 +107,11 @@ export default async function Home() {
         <div className="w-full mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MainValueItem
             label="Total GUSD"
-            value={unitTotalSupply.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            value={unitTotalSupply.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           />
           <MainValueItem
             label="Total Collateral Value"
-            value={`$${totalVaultValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+            value={`$${totalVaultValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
           />
           <MainValueItem
             label="Collateralization"
