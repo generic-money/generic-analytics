@@ -159,6 +159,7 @@ export const CONTRACTS = {
 export const DUNE_QUERIES = {
   unitsInTime: 6283930,
   depositsInTime: 6284260,
+  depositsPerTx: 6771993,
   yieldInTime: 6535475,
   rebalancesInTime: 6535593,
   predepositsInTime: 6535610

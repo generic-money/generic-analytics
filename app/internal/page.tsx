@@ -93,6 +93,7 @@ export default async function Internal() {
 
   const unitsInTime = await dune.fetchUnitsInTime()
   const depositsInTime = await dune.fetchDepositsInTime()
+  const depositsPerTx = await dune.fetchDepositsPerTx()
 
   const totalVaultValue = usdcTotalAssets * usdcPrice + usdtTotalAssets * usdtPrice + usdsTotalAssets * usdsPrice
   const overcollateralization = (totalVaultValue * 100 / unitTotalSupply)
@@ -286,6 +287,111 @@ export default async function Internal() {
           </div>
         </div>
 
+        {/* Deposits Per Transaction Table Section */}
+        <div className="w-full mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Deposits Per Transaction</h2>
+            {depositsPerTx.executionEndedAt && (
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Last Dune query updated: {new Date(depositsPerTx.executionEndedAt).toLocaleString()}
+              </div>
+            )}
+          </div>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Time
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      <div className="flex items-center justify-end gap-2">
+                        <Image
+                          src={CONTRACTS.ethereum.assets.usdc.metadata.iconSrc}
+                          alt="USDC"
+                          width={20}
+                          height={20}
+                        />
+                        <span>USDC</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      <div className="flex items-center justify-end gap-2">
+                        <Image
+                          src={CONTRACTS.ethereum.assets.usdt.metadata.iconSrc}
+                          alt="USDT"
+                          width={20}
+                          height={20}
+                        />
+                        <span>USDT</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      <div className="flex items-center justify-end gap-2">
+                        <Image
+                          src={CONTRACTS.ethereum.assets.usds.metadata.iconSrc}
+                          alt="USDS"
+                          width={20}
+                          height={20}
+                        />
+                        <span>USDS</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Tenderly
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  {depositsPerTx.data.map((entry, index) => (
+                    <tr key={index} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 dark:text-zinc-400">
+                        {entry.time}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
+                        entry.usdc < 0 ? 'text-red-600 dark:text-red-400' :
+                        entry.usdc > 0 ? 'text-green-600 dark:text-green-400' :
+                        'text-zinc-900 dark:text-zinc-100'
+                      }`}>
+                        {entry.usdc.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
+                        entry.usdt < 0 ? 'text-red-600 dark:text-red-400' :
+                        entry.usdt > 0 ? 'text-green-600 dark:text-green-400' :
+                        'text-zinc-900 dark:text-zinc-100'
+                      }`}>
+                        {entry.usdt.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium ${
+                        entry.usds < 0 ? 'text-red-600 dark:text-red-400' :
+                        entry.usds > 0 ? 'text-green-600 dark:text-green-400' :
+                        'text-zinc-900 dark:text-zinc-100'
+                      }`}>
+                        {entry.usds.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                        <a
+                          href={`https://dashboard.tenderly.co/tx/${entry.tx}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                          title="View in Tenderly Dashboard"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 inline-block">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                          </svg>
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
         <footer className="w-full mt-auto pt-8 pb-4 flex items-center justify-center border-t border-zinc-200 dark:border-zinc-800">
           <Image
             src="/img/generic-logo-black.png"
