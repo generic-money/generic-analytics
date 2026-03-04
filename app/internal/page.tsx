@@ -338,6 +338,9 @@ export default async function Internal() {
                         <span>USDS</span>
                       </div>
                     </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Volume
+                    </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                       Tenderly
                     </th>
@@ -369,6 +372,9 @@ export default async function Internal() {
                         'text-zinc-900 dark:text-zinc-100'
                       }`}>
                         {entry.usds.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-zinc-900 dark:text-zinc-100`}>
+                        {(entry.volume).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                         <a

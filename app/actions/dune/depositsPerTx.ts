@@ -10,5 +10,6 @@ export async function fetchDepositsPerTx() {
     usdc: Number(row.usdc) / 10 ** CONTRACTS.ethereum.assets.usdc.decimals,
     usdt: Number(row.usdt) / 10 ** CONTRACTS.ethereum.assets.usdt.decimals,
     usds: Number(row.usds) / 10 ** CONTRACTS.ethereum.assets.usds.decimals,
+    volume: Number(row.volume) / 10 ** 18,
   }))
 }
