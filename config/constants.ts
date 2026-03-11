@@ -262,7 +262,7 @@ export const YIELD_DESTINATIONS = {
       {
         id: 'citrea-unstaked',
         name: 'Citrea Team Safe',
-        address: '0x0000000000000000000000000000000000000000' as const,
+        address: '0x280f3A0B0A98185B7f34403c2620ff872A862506' as const,
       }
     ]
   }
