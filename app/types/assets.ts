@@ -1,6 +1,6 @@
 import { ValueContract } from './common';
 
-export type AssetKey = 'unit' | 'gusd' | 'usdc' | 'usdt' | 'usds';
+export type AssetKey = 'unit' | 'gusd' | 'usdc' | 'usdt' | 'usds' | 'morpho';
 
 export interface AssetContract extends ValueContract {
   metadata: AssetMetadata;

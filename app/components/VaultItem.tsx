@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link';
 import { AssetMetadata } from '@/app/types/assets';
 
 interface VaultItemProps {
@@ -139,7 +140,12 @@ export default function VaultItem(props: VaultItemProps) {
 
             {/* Rewards */}
             <div className="space-y-1">
-              <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Rewards To Claim</div>
+              <div className="flex justify-between items-center">
+                <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Rewards To Claim</div>
+                <Link href="/internal/rewards" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                  View →
+                </Link>
+              </div>
 
               {props.internal.rewards.length > 0 ? (
                 props.internal.rewards.map((reward, index) => (

@@ -90,6 +90,16 @@ export const CONTRACTS = {
           name: 'USDS Stablecoin',
           color: '#F4B731',
         }
+      },
+      morpho: {
+        address: '0x58D97B57BB95320F9a05dC918Aef65434969c2B2' as const,
+        decimals: 18,
+        metadata: {
+          iconSrc: '/img/morpho.png',
+          symbol: 'MORPHO',
+          name: 'Morpho Token',
+          color: '#00D395',
+        }
       }
     } as Record<AssetKey, AssetContract>,
     priceFeeds: {

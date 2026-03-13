@@ -14,6 +14,7 @@ export async function fetchMerkleRewards(vault: VaultContract) {
         symbol: reward.token.symbol,
         decimals: reward.token.decimals,
         price: reward.token.price,
+        address: reward.token.address,
       }
     })))
 }
