@@ -6,7 +6,7 @@ import * as rpc from '@/app/actions/rpc'
 import { GENERIC_FEE_PERCENTAGE, CONTRACTS, YIELD_DESTINATIONS, type YieldDestinationKey, type YieldDestination, type YieldDestinationValue } from '@/config/constants'
 import { mainnet } from 'viem/chains'
 import { citrea } from '@/config/chains/citrea'
-import { downloadTxBatch } from './buildTxBatch'
+import { downloadTxBatch, downloadYieldReport } from './buildTxBatch'
 
 interface DestinationBreakdown {
   destination: YieldDestinationValue
@@ -219,6 +219,13 @@ export default function YieldDistributionCalculator() {
 
     const distributedYield = getDistributedYield()
     await downloadTxBatch(results, totalYield, distributedYield)
+  }
+
+  const downloadReport = () => {
+    if (!results) return
+
+    const distributedYield = getDistributedYield()
+    downloadYieldReport(results, totalYield, distributedYield)
   }
 
   const calculateYieldDistribution = async () => {
@@ -469,7 +476,16 @@ export default function YieldDistributionCalculator() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Download Transaction JSONs (2)
+                  Download Distribution JSON
+                </button>
+                <button
+                  onClick={downloadReport}
+                  className="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h8m-8 4h10M5 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" />
+                  </svg>
+                  Download Yield Report
                 </button>
               </div>
             </div>

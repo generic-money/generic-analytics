@@ -30,6 +30,114 @@ interface ChainYield {
   destinations: DestinationBreakdown[]
 }
 
+interface YieldTargetRow {
+  chainKey: YieldDestinationKey
+  chainName: string
+  chainId: number
+  destinationName: string
+  destinationAddress: string
+  yieldAmount: number
+}
+
+interface YieldDistributionArtifacts {
+  yieldTargets: YieldTargetRow[]
+  ethereumDestinations: { address: Address; amount: bigint }[]
+  peripheryTargetsByChain: Map<YieldDestinationKey, { address: Address; amount: bigint }[]>
+  bridgeAmountsByChain: Map<number, bigint>
+  bridgeRecipientsByChain: Map<number, string>
+  bridgeByChain: Map<number, BridgeAdapter>
+  destinationWhitelabelsByChain: Map<number, string>
+}
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+// Converts decimal USD values to 18-decimal wei amount for tx payloads.
+const toWei = (value: number): bigint => {
+  return parseUnits(value.toFixed(18), 18)
+}
+
+function buildYieldDistributionArtifacts(yieldResults: ChainYield[]): YieldDistributionArtifacts {
+  const yieldTargets: YieldTargetRow[] = []
+  const ethereumDestinations: { address: Address; amount: bigint }[] = []
+  const peripheryTargetsByChain = new Map<YieldDestinationKey, { address: Address; amount: bigint }[]>()
+  const bridgeAmountsByChain = new Map<number, bigint>()
+  const bridgeRecipientsByChain = new Map<number, string>()
+  const bridgeByChain = new Map<number, BridgeAdapter>()
+  const destinationWhitelabelsByChain = new Map<number, string>()
+
+  for (const chain of yieldResults) {
+    const yieldDest = YIELD_DESTINATIONS[chain.key]
+    const chainTargets: { address: Address; amount: bigint }[] = []
+
+    for (const dest of chain.destinations) {
+      yieldTargets.push({
+        chainKey: chain.key,
+        chainName: yieldDest.name,
+        chainId: yieldDest.chainId,
+        destinationName: dest.destination.name,
+        destinationAddress: dest.destination.address,
+        yieldAmount: dest.yieldAmount,
+      })
+
+      const hasValidAddress = dest.destination.address !== ZERO_ADDRESS
+      if (!hasValidAddress || dest.yieldAmount <= 0) {
+        continue
+      }
+
+      const amount = toWei(dest.yieldAmount)
+      chainTargets.push({
+        address: dest.destination.address as Address,
+        amount,
+      })
+
+      if (yieldDest.chainId === 1 && dest.destination.address !== CONTRACTS.ethereum.dao.address) {
+        ethereumDestinations.push({
+          address: dest.destination.address as Address,
+          amount,
+        })
+      }
+    }
+
+    if (chainTargets.length > 0) {
+      peripheryTargetsByChain.set(chain.key, chainTargets)
+    }
+
+    if (yieldDest.chainId === 1 || chainTargets.length === 0) {
+      continue
+    }
+
+    if (!yieldDest.distributor) {
+      throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): No distributor configured for non-Ethereum chain`)
+    }
+    if (!yieldDest.distributor.address || yieldDest.distributor.bridge === undefined) {
+      throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): Distributor is configured but missing address or bridgeType`)
+    }
+    if (!yieldDest.distributor.whitelabel?.address) {
+      throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): Distributor is configured but missing whitelabel address`)
+    }
+
+    bridgeRecipientsByChain.set(yieldDest.chainId, yieldDest.distributor.address)
+    bridgeByChain.set(yieldDest.chainId, yieldDest.distributor.bridge)
+    destinationWhitelabelsByChain.set(yieldDest.chainId, yieldDest.distributor.whitelabel.address)
+
+    const totalChainAmount = chainTargets.reduce((sum, target) => sum + target.amount, BigInt(0))
+    if (totalChainAmount > BigInt(0)) {
+      const existing = bridgeAmountsByChain.get(yieldDest.chainId) || BigInt(0)
+      bridgeAmountsByChain.set(yieldDest.chainId, existing + totalChainAmount)
+    }
+  }
+
+  return {
+    yieldTargets,
+    ethereumDestinations,
+    peripheryTargetsByChain,
+    bridgeAmountsByChain,
+    bridgeRecipientsByChain,
+    bridgeByChain,
+    destinationWhitelabelsByChain,
+  }
+}
+
 /**
  * Estimates the bridge fee for a given chain and amount
  */
@@ -65,14 +173,11 @@ async function estimateBridgeFee(
 export async function buildYieldDistributionTxBatch(
   yieldResults: ChainYield[],
   totalYield: number,
-  distributingYield: number
+  distributingYield: number,
+  artifacts?: YieldDistributionArtifacts
 ): Promise<TxBuilderTransaction[]> {
   const transactions: TxBuilderTransaction[] = []
-
-  // Convert to wei (18 decimals)
-  const toWei = (value: number): bigint => {
-    return parseUnits(value.toFixed(18), 18)
-  }
+  const computedArtifacts = artifacts ?? buildYieldDistributionArtifacts(yieldResults)
 
   // 1. Set safety buffer: (distributable - distributing)
   transactions.push({
@@ -119,27 +224,8 @@ export async function buildYieldDistributionTxBatch(
   })
 
   // 5. Build list of Ethereum destinations (direct transfers)
-  const ethereumDestinations: { address: Address; amount: bigint }[] = []
-
-  // Collect all Ethereum destinations (chainId === 1)
-  for (const chain of yieldResults) {
-    const yieldDest = YIELD_DESTINATIONS[chain.key]
-
-    if (yieldDest.chainId === 1) {
-      // This is on Ethereum
-      for (const dest of chain.destinations) {
-        if (dest.yieldAmount > 0 && dest.destination.address !== '0x0000000000000000000000000000000000000000') {
-          ethereumDestinations.push({
-            address: dest.destination.address as Address,
-            amount: toWei(dest.yieldAmount)
-          })
-        }
-      }
-    }
-  }
-
   // Add transfer transactions for Ethereum destinations
-  for (const dest of ethereumDestinations) {
+  for (const dest of computedArtifacts.ethereumDestinations) {
     transactions.push({
       to: CONTRACTS.ethereum.assets.gusd.address,
       value: 0,
@@ -156,59 +242,11 @@ export async function buildYieldDistributionTxBatch(
   // If a chain has a periphery distributor configured, bridge to that distributor address
   // Otherwise, bridge to the first destination on that chain
 
-  // Map chainId -> total amount to bridge
-  const bridgeAmountsByChain = new Map<number, bigint>()
-
-  // Map chainId -> remoteRecipient (distributor or first destination on that chain)
-  const bridgeRecipientsByChain = new Map<number, string>()
-
-  // Map chainId -> bridge (from distributor config)
-  const bridgeByChain = new Map<number, BridgeAdapter>()
-
-  // Map chainId -> destinationWhitelabel (from distributor config)
-  const destinationWhitelabelsByChain = new Map<number, string>()
-
-  for (const chain of yieldResults) {
-    const yieldDest = YIELD_DESTINATIONS[chain.key]
-
-    if (yieldDest.chainId !== 1) {
-      // This needs to be bridged
-
-      // Set distributor
-      if (!yieldDest.distributor) {
-        throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): No distributor configured for non-Ethereum chain`)
-      }
-      if (!yieldDest.distributor.address || yieldDest.distributor.bridge === undefined) {
-        throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): Distributor is configured but missing address or bridgeType`)
-      }
-      if (!yieldDest.distributor.whitelabel?.address) {
-        throw new Error(`Chain ${yieldDest.name} (${yieldDest.chainId}): Distributor is configured but missing whitelabel address`)
-      }
-      bridgeRecipientsByChain.set(yieldDest.chainId, yieldDest.distributor.address)
-      bridgeByChain.set(yieldDest.chainId, yieldDest.distributor.bridge)
-      destinationWhitelabelsByChain.set(yieldDest.chainId, yieldDest.distributor.whitelabel.address)
-
-      // Calculate total amount for this chain
-      let totalChainAmount = BigInt(0)
-      for (const dest of chain.destinations) {
-        if (dest.yieldAmount > 0 && dest.destination.address !== '0x0000000000000000000000000000000000000000') {
-          totalChainAmount += toWei(dest.yieldAmount)
-        }
-      }
-
-      if (totalChainAmount > BigInt(0)) {
-        // Aggregate amounts for the same chain
-        const existingAmount = bridgeAmountsByChain.get(yieldDest.chainId) || BigInt(0)
-        bridgeAmountsByChain.set(yieldDest.chainId, existingAmount + totalChainAmount)
-      }
-    }
-  }
-
   // Add bridge transactions with estimated fees
-  for (const [chainId, amount] of bridgeAmountsByChain.entries()) {
-    const remoteRecipient = bridgeRecipientsByChain.get(chainId)
-    const bridge = bridgeByChain.get(chainId)
-    const destinationWhitelabel = destinationWhitelabelsByChain.get(chainId)
+  for (const [chainId, amount] of computedArtifacts.bridgeAmountsByChain.entries()) {
+    const remoteRecipient = computedArtifacts.bridgeRecipientsByChain.get(chainId)
+    const bridge = computedArtifacts.bridgeByChain.get(chainId)
+    const destinationWhitelabel = computedArtifacts.destinationWhitelabelsByChain.get(chainId)
 
     if (!remoteRecipient) {
       throw new Error(`No recipient found for chain ${chainId}`)
@@ -266,20 +304,78 @@ export async function buildYieldDistributionTxBatch(
   return transactions
 }
 
+/**
+ * Downloads a JSON file with the given data and filename
+ */
+function downloadJSON(data: any, filename: string): void {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+function downloadText(content: string, filename: string, mimeType: string): void {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+function buildYieldReportMarkdown(
+  yieldTargets: YieldTargetRow[],
+  totalYield: number,
+  distributingYield: number
+): string {
+  const distributingYieldWei = toWei(distributingYield)
+  const lines: string[] = []
+  lines.push('# Yield Report')
+  lines.push('')
+  lines.push(`Generated At: ${new Date().toISOString()}`)
+  lines.push('')
+  lines.push(`Distributing Yield (wei): ${distributingYieldWei.toString()}`)
+  lines.push('')
+  lines.push('| Chain | Chain ID | Target | Address | Yield | Yield (wei) |')
+  lines.push('| --- | --- | --- | --- | ---: | ---: |')
+
+  for (const target of yieldTargets) {
+    lines.push(
+      `| ${target.chainName} | ${target.chainId} | ${target.destinationName} | ${target.destinationAddress} | ${target.yieldAmount.toFixed(2)} | ${toWei(target.yieldAmount).toString()} |`
+    )
+  }
+
+  return lines.join('\n')
+}
+
 export async function downloadTxBatch(
   yieldResults: ChainYield[],
   totalYield: number,
   distributingYield: number
 ): Promise<void> {
-  const jsonData = await buildYieldDistributionTxBatch(yieldResults, totalYield, distributingYield)
+  const timestamp = Date.now()
+  const artifacts = buildYieldDistributionArtifacts(yieldResults)
 
-  const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `yield-distribution-txs-${Date.now()}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  // Download main transaction batch for Ethereum (L1)
+  const jsonData = await buildYieldDistributionTxBatch(yieldResults, totalYield, distributingYield, artifacts)
+  downloadJSON(jsonData, `yield-distribution-txs-${timestamp}.json`)
+}
+
+export function downloadYieldReport(
+  yieldResults: ChainYield[],
+  totalYield: number,
+  distributingYield: number
+): void {
+  const timestamp = Date.now()
+  const artifacts = buildYieldDistributionArtifacts(yieldResults)
+  const markdown = buildYieldReportMarkdown(artifacts.yieldTargets, totalYield, distributingYield)
+  downloadText(markdown, `yield-report-${timestamp}.md`, 'text/markdown;charset=utf-8')
 }
