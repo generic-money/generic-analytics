@@ -176,19 +176,23 @@ export async function buildYieldDistributionTxBatch(
   yieldResults: ChainYield[],
   totalYield: number,
   distributingYield: number,
+  existingSafetyBuffer: number,
   artifacts?: YieldDistributionArtifacts
 ): Promise<TxBuilderTransaction[]> {
   const transactions: TxBuilderTransaction[] = []
   const computedArtifacts = artifacts ?? buildYieldDistributionArtifacts(yieldResults)
 
-  // 1. Set safety buffer: (distributable - distributing)
+  // Preserve existing buffer and add the undistributed remainder.
+  const newSafetyBufferYieldDeduction = existingSafetyBuffer + (totalYield - distributingYield)
+
+  // 1. Set safety buffer: existing buffer + (distributable - distributing)
   transactions.push({
     to: CONTRACTS.ethereum.controller.address,
     value: 0,
     data: encodeFunctionData({
       abi: controllerAbi,
       functionName: 'setSafetyBufferYieldDeduction',
-      args: [toWei(totalYield - distributingYield)]
+      args: [toWei(newSafetyBufferYieldDeduction)]
     })
   })
 
@@ -312,10 +316,11 @@ export async function buildYieldDistributionTxBatch(
 export async function buildYieldDistributionTxs(
   yieldResults: ChainYield[],
   totalYield: number,
-  distributingYield: number
+  distributingYield: number,
+  existingSafetyBuffer: number
 ): Promise<TxBuilderTransaction[]> {
   const artifacts = buildYieldDistributionArtifacts(yieldResults)
-  return buildYieldDistributionTxBatch(yieldResults, totalYield, distributingYield, artifacts)
+  return buildYieldDistributionTxBatch(yieldResults, totalYield, distributingYield, existingSafetyBuffer, artifacts)
 }
 
 /**

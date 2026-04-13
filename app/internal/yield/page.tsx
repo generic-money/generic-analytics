@@ -220,7 +220,7 @@ export default function YieldDistributionCalculator() {
 
     const distributedYield = getDistributedYield()
     const timestamp = Date.now()
-    const txs = await buildYieldDistributionTxs(results, totalYield, distributedYield)
+    const txs = await buildYieldDistributionTxs(results, totalYield, distributedYield, safetyBuffer)
     downloadJSON(txs, `yield-distribution-txs-${timestamp}.json`)
   }
 
@@ -452,6 +452,12 @@ export default function YieldDistributionCalculator() {
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">Undistributed Yield:</span>
                     <span className="text-sm font-mono font-semibold text-zinc-900 dark:text-zinc-100">
                       ${getUndistributedYield().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400">New Safety Buffer Deduction:</span>
+                    <span className="text-sm font-mono font-semibold text-amber-600 dark:text-amber-400">
+                      ${(safetyBuffer + getUndistributedYield()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
