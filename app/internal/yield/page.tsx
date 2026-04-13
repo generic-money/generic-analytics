@@ -3,10 +3,11 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import * as rpc from '@/app/actions/rpc'
-import { GENERIC_FEE_PERCENTAGE, CONTRACTS, YIELD_DESTINATIONS, type YieldDestinationKey, type YieldDestination, type YieldDestinationValue } from '@/config/constants'
+import { GENERIC_FEE_PERCENTAGE, CONTRACTS, YIELD_DESTINATIONS, type YieldDestinationKey, type YieldDestinationValue } from '@/config/constants'
 import { mainnet } from 'viem/chains'
 import { citrea } from '@/config/chains/citrea'
-import { downloadTxBatch, downloadYieldReport } from './buildTxBatch'
+import { buildYieldDistributionTxs, getYieldReport } from './buildTxBatch'
+import { downloadJSON, downloadFile } from '@/app/utils/downloadUtils'
 
 interface DestinationBreakdown {
   destination: YieldDestinationValue
@@ -218,14 +219,18 @@ export default function YieldDistributionCalculator() {
     if (!results) return
 
     const distributedYield = getDistributedYield()
-    await downloadTxBatch(results, totalYield, distributedYield)
+    const timestamp = Date.now()
+    const txs = await buildYieldDistributionTxs(results, totalYield, distributedYield)
+    downloadJSON(txs, `yield-distribution-txs-${timestamp}.json`)
   }
 
-  const downloadReport = () => {
+  const downloadReport = async () => {
     if (!results) return
 
     const distributedYield = getDistributedYield()
-    downloadYieldReport(results, totalYield, distributedYield)
+    const timestamp = Date.now()
+    const markdown = await getYieldReport(results, distributedYield)
+    downloadFile(markdown, `yield-report-${timestamp}.md`, 'text/markdown;charset=utf-8')
   }
 
   const calculateYieldDistribution = async () => {

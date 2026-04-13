@@ -1,3 +1,5 @@
+'use server'
+
 import { encodeFunctionData, Address, parseUnits } from 'viem'
 import { controllerAbi } from '@/public/abi/Controller.abi'
 import { genericUSDAbi } from '@/public/abi/GenericUSD.abi'
@@ -305,38 +307,26 @@ export async function buildYieldDistributionTxBatch(
 }
 
 /**
- * Downloads a JSON file with the given data and filename
+ * Builds yield distribution transactions and returns them (to be downloaded on client)
  */
-function downloadJSON(data: any, filename: string): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
-
-function downloadText(content: string, filename: string, mimeType: string): void {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
-
-function buildYieldReportMarkdown(
-  yieldTargets: YieldTargetRow[],
+export async function buildYieldDistributionTxs(
+  yieldResults: ChainYield[],
   totalYield: number,
   distributingYield: number
-): string {
+): Promise<TxBuilderTransaction[]> {
+  const artifacts = buildYieldDistributionArtifacts(yieldResults)
+  return buildYieldDistributionTxBatch(yieldResults, totalYield, distributingYield, artifacts)
+}
+
+/**
+ * Builds yield report markdown and returns it (to be downloaded on client)
+ */
+export async function getYieldReport(
+  yieldResults: ChainYield[],
+  distributingYield: number
+): Promise<string> {
   const distributingYieldWei = toWei(distributingYield)
+  const artifacts = buildYieldDistributionArtifacts(yieldResults)
   const lines: string[] = []
   lines.push('# Yield Report')
   lines.push('')
@@ -347,35 +337,11 @@ function buildYieldReportMarkdown(
   lines.push('| Chain | Chain ID | Target | Address | Yield | Yield (wei) |')
   lines.push('| --- | --- | --- | --- | ---: | ---: |')
 
-  for (const target of yieldTargets) {
+  for (const target of artifacts.yieldTargets) {
     lines.push(
       `| ${target.chainName} | ${target.chainId} | ${target.destinationName} | ${target.destinationAddress} | ${target.yieldAmount.toFixed(2)} | ${toWei(target.yieldAmount).toString()} |`
     )
   }
 
   return lines.join('\n')
-}
-
-export async function downloadTxBatch(
-  yieldResults: ChainYield[],
-  totalYield: number,
-  distributingYield: number
-): Promise<void> {
-  const timestamp = Date.now()
-  const artifacts = buildYieldDistributionArtifacts(yieldResults)
-
-  // Download main transaction batch for Ethereum (L1)
-  const jsonData = await buildYieldDistributionTxBatch(yieldResults, totalYield, distributingYield, artifacts)
-  downloadJSON(jsonData, `yield-distribution-txs-${timestamp}.json`)
-}
-
-export function downloadYieldReport(
-  yieldResults: ChainYield[],
-  totalYield: number,
-  distributingYield: number
-): void {
-  const timestamp = Date.now()
-  const artifacts = buildYieldDistributionArtifacts(yieldResults)
-  const markdown = buildYieldReportMarkdown(artifacts.yieldTargets, totalYield, distributingYield)
-  downloadText(markdown, `yield-report-${timestamp}.md`, 'text/markdown;charset=utf-8')
 }

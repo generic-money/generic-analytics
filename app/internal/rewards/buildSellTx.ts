@@ -1,7 +1,8 @@
+'use server'
+
 import { encodeFunctionData, Address } from 'viem'
 import { controllerAbi } from '@/public/abi/Controller.abi'
 import { CONTRACTS } from '@/config/constants'
-import { VaultKey } from '@/app/types/vaults'
 
 export interface SellRewardsTransaction {
   to: Address
@@ -83,39 +84,4 @@ export async function buildSellRewardsTx(
       value: 0
     }
   ]
-}
-
-/**
- * Downloads a transaction as a JSON file
- */
-export function downloadTransactionJson(
-  transactions: SellRewardsTransaction[],
-  vaultKey: VaultKey
-): void {
-  const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `sell-rewards-${vaultKey}-${Date.now()}.json`
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-/**
- * Builds and downloads a sell rewards transaction
- */
-export async function buildAndDownloadSellTx(
-  rewardTokenAddress: Address,
-  vaultAddress: Address,
-  vaultKey: VaultKey,
-  rewardAmount: bigint,
-  destinationToken: Address,
-): Promise<void> {
-  const transaction = await buildSellRewardsTx(
-    rewardTokenAddress,
-    vaultAddress,
-    rewardAmount,
-    destinationToken,
-  )
-  downloadTransactionJson(transaction, vaultKey)
 }

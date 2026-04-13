@@ -2,7 +2,8 @@
 
 import { VaultRewardsData } from './types'
 import { CONTRACTS } from '@/config/constants'
-import { buildAndDownloadSellTx } from './buildSellTx'
+import { buildSellRewardsTx } from './buildSellTx'
+import { downloadJSON } from '@/app/utils/downloadUtils'
 
 interface VaultRewardsCardProps {
   vaultData: VaultRewardsData;
@@ -124,13 +125,14 @@ export default function VaultRewardsCard({ vaultData }: VaultRewardsCardProps) {
                   </button>
                   <button
                     onClick={async () => {
-                      await buildAndDownloadSellTx(
+                      const timestamp = Date.now()
+                      const txs = await buildSellRewardsTx(
                         tokenAddress as `0x${string}`,
                         vaultData.vaultAddress as `0x${string}`,
-                        vaultData.vaultKey,
                         BigInt(Math.floor(reward.balance * Math.pow(10, reward.token.decimals))),
                         vaultData.asset.address as `0x${string}`
                       )
+                      downloadJSON(txs, `sell-rewards-${vaultData.vaultKey}-${timestamp}.json`)
                     }}
                     className="flex-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={reward.balance === 0}
