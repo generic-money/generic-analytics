@@ -248,6 +248,23 @@ export async function buildYieldDistributionTxBatch(
   // If a chain has a periphery distributor configured, bridge to that distributor address
   // Otherwise, bridge to the first destination on that chain
 
+  // Approve GUSD to the bridge coordinator for the total amount being bridged across all chains
+  const totalBridgeAmount = [...computedArtifacts.bridgeAmountsByChain.values()].reduce(
+    (sum, amount) => sum + amount,
+    BigInt(0)
+  )
+  if (totalBridgeAmount > BigInt(0)) {
+    transactions.push({
+      to: CONTRACTS.ethereum.assets.gusd.address,
+      value: 0,
+      data: encodeFunctionData({
+        abi: genericUSDAbi,
+        functionName: 'approve',
+        args: [CONTRACTS.ethereum.bridgeCoordinator.address, totalBridgeAmount]
+      })
+    })
+  }
+
   // Add bridge transactions with estimated fees
   for (const [chainId, amount] of computedArtifacts.bridgeAmountsByChain.entries()) {
     const remoteRecipient = computedArtifacts.bridgeRecipientsByChain.get(chainId)
